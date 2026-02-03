@@ -108,8 +108,8 @@ session isn't established, causing a redirect loop.
 ```
 packages/
   cli/   → CLI (issy)
-  core/  → Storage library (@issy/core)
-  ui/    → Web UI + API (@issy/app)
+  core/  → Storage library (@miketromba/issy-core)
+  ui/    → Web UI + API (@miketromba/issy-app)
 ```
 
 ```bash

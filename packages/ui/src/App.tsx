@@ -6,8 +6,8 @@ import { FilterBar } from './components/FilterBar'
 import { CreateIssueModal } from './components/CreateIssueModal'
 import { EditIssueModal } from './components/EditIssueModal'
 import { ConfirmModal } from './components/ConfirmModal'
-import type { Issue, IssueFrontmatter } from '@issy/core'
-import { filterByQuery } from '@issy/core'
+import type { Issue, IssueFrontmatter } from '@miketromba/issy-core'
+import { filterByQuery } from '@miketromba/issy-core'
 
 // Re-export types for components
 export type { Issue, IssueFrontmatter }

@@ -23,7 +23,7 @@ import {
   filterByQuery,
   type CreateIssueInput,
   type UpdateIssueInput,
-} from "@issy/core";
+} from "@miketromba/issy-core";
 
 // Initialize issues directory from env or current working directory
 const DEFAULT_ROOT = process.env.ISSUES_ROOT || process.cwd();

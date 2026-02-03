@@ -64,4 +64,4 @@ if (shouldInitOnly) {
   process.exit(0);
 }
 
-await import("@issy/app");
+await import("@miketromba/issy-app");

@@ -1,4 +1,4 @@
-# @issy/app
+# @miketromba/issy-app
 
 Local web UI + API server for issy.
 

@@ -3,7 +3,7 @@ import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
 import type { Issue } from "../App";
 import { Badge } from "./Badge";
-import { formatDisplayDate, formatFullDate } from "@issy/core";
+import { formatDisplayDate, formatFullDate } from "@miketromba/issy-core";
 
 interface IssueDetailProps {
   issue: Issue;

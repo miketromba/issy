@@ -1,6 +1,6 @@
 import type { Issue } from "../App";
 import { Badge } from "./Badge";
-import { formatDisplayDate, formatFullDate } from "@issy/core";
+import { formatDisplayDate, formatFullDate } from "@miketromba/issy-core";
 
 interface IssueListProps {
   issues: Issue[];

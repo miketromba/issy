@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
-import { parseQuery } from '@issy/core'
+import { parseQuery } from '@miketromba/issy-core'
 import type { Issue } from '../App'
 
 interface FilterBarProps {

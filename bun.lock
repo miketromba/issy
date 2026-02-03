@@ -13,15 +13,14 @@
       "version": "0.1.0",
       "bin": {
         "issy": "bin/issy",
-        "issues": "bin/issues",
       },
       "dependencies": {
-        "@issy/app": "workspace:*",
-        "@issy/core": "workspace:*",
+        "@miketromba/issy-app": "^0.1.0",
+        "@miketromba/issy-core": "^0.1.0",
       },
     },
     "packages/core": {
-      "name": "@issy/core",
+      "name": "@miketromba/issy-core",
       "version": "0.1.0",
       "dependencies": {
         "date-fns": "^4.1.0",
@@ -29,10 +28,10 @@
       },
     },
     "packages/ui": {
-      "name": "@issy/app",
+      "name": "@miketromba/issy-app",
       "version": "0.1.0",
       "dependencies": {
-        "@issy/core": "workspace:*",
+        "@miketromba/issy-core": "^0.1.0",
         "@tailwindcss/typography": "^0.5.16",
         "bun-plugin-tailwind": "^0.1.2",
         "highlight.js": "^11.11.1",
@@ -49,9 +48,9 @@
     },
   },
   "packages": {
-    "@issy/app": ["@issy/app@workspace:packages/ui"],
+    "@miketromba/issy-app": ["@miketromba/issy-app@workspace:packages/ui"],
 
-    "@issy/core": ["@issy/core@workspace:packages/core"],
+    "@miketromba/issy-core": ["@miketromba/issy-core@workspace:packages/core"],
 
     "@oven/bun-darwin-aarch64": ["@oven/bun-darwin-aarch64@1.3.8", "", { "os": "darwin", "cpu": "arm64" }, "sha512-hPERz4IgXCM6Y6GdEEsJAFceyJMt29f3HlFzsvE/k+TQjChRhar6S+JggL35b9VmFfsdxyCOOTPqgnSrdV0etA=="],
 

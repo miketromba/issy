@@ -1,5 +1,5 @@
 {
-  "name": "@issy/core",
+  "name": "@miketromba/issy-core",
   "version": "0.1.0",
   "description": "Issue storage, search, and parsing for issy",
   "type": "module",
