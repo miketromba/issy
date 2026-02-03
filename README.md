@@ -56,6 +56,10 @@ npx issy
 
 Opens a local UI at `http://localhost:1554` for browsing and editing issues.
 
+<p align="center">
+  <img src="assets/web-ui-screenshot.png" alt="issy web UI" width="800" />
+</p>
+
 ### CLI
 
 ```bash
