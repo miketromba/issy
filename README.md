@@ -63,6 +63,8 @@ Opens a local UI at `http://localhost:1554` for browsing and editing issues.
 ### CLI
 
 ```bash
+issy init                     # Create .issues/ directory
+issy init --seed              # Create with a welcome issue
 issy list                     # List open issues
 issy search "auth"            # Fuzzy search
 issy read 0001                # View issue
@@ -71,6 +73,19 @@ issy close 0001               # Close issue
 ```
 
 Run `issy help` for full options.
+
+### Monorepo Support
+
+issy automatically walks up from the current directory to find an existing `.issues/` folder. This means you can run `npx issy` from any subdirectory (e.g., `packages/foo/`) and it will find and use the repo root's issues.
+
+```bash
+# In a monorepo, issues are typically at the root:
+my-monorepo/
+  .issues/           # ← issy finds this automatically
+  packages/
+    frontend/        # ← works from here
+    backend/         # ← or here
+```
 
 ---
 

@@ -25,6 +25,8 @@ Opens a local UI at `http://localhost:1554`.
 ### CLI
 
 ```bash
+issy init                     # Create .issues/ directory
+issy init --seed              # Create with a welcome issue
 issy list                     # List open issues
 issy search "auth"            # Fuzzy search
 issy read 0001                # View issue
@@ -33,6 +35,10 @@ issy close 0001               # Close issue
 ```
 
 Run `issy help` for full options.
+
+### Monorepo Support
+
+issy walks up from the current directory to find an existing `.issues/` folder, so you can run it from any subdirectory.
 
 ## Configuration
 

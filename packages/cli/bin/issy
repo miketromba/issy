@@ -1,38 +1,38 @@
 #!/usr/bin/env node
-import { dirname } from "node:path";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname } from 'node:path'
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const args = process.argv.slice(2);
+const args = process.argv.slice(2)
 const cliCommands = new Set([
-  "list",
-  "search",
-  "read",
-  "create",
-  "update",
-  "close",
-  "help",
-  "--help",
-  "-h",
-]);
+	'list',
+	'search',
+	'read',
+	'create',
+	'update',
+	'close',
+	'help',
+	'--help',
+	'-h'
+])
 
 /**
  * Find .issues directory by walking up from the given path.
  * Returns the path if found, or null if not found.
  */
 function findIssuesDirUpward(fromPath) {
-  let current = resolve(fromPath);
-  for (let i = 0; i < 20; i++) {
-    const candidate = join(current, ".issues");
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-    const parent = dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
-  return null;
+	let current = resolve(fromPath)
+	for (let i = 0; i < 20; i++) {
+		const candidate = join(current, '.issues')
+		if (existsSync(candidate)) {
+			return candidate
+		}
+		const parent = dirname(current)
+		if (parent === current) break
+		current = parent
+	}
+	return null
 }
 
 /**
@@ -40,17 +40,17 @@ function findIssuesDirUpward(fromPath) {
  * Returns the directory containing .git, or null if not in a git repo.
  */
 function findGitRoot(fromPath) {
-  let current = resolve(fromPath);
-  for (let i = 0; i < 20; i++) {
-    const gitDir = join(current, ".git");
-    if (existsSync(gitDir)) {
-      return current;
-    }
-    const parent = dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
-  return null;
+	let current = resolve(fromPath)
+	for (let i = 0; i < 20; i++) {
+		const gitDir = join(current, '.git')
+		if (existsSync(gitDir)) {
+			return current
+		}
+		const parent = dirname(current)
+		if (parent === current) break
+		current = parent
+	}
+	return null
 }
 
 /**
@@ -61,78 +61,82 @@ function findGitRoot(fromPath) {
  * 4. Fall back to creating .issues in ISSUES_ROOT or cwd
  */
 function resolveIssuesDir() {
-  // 1. Explicit override
-  if (process.env.ISSUES_DIR) {
-    return resolve(process.env.ISSUES_DIR);
-  }
-  
-  // 2. Try to find existing .issues by walking up
-  const startDir = process.env.ISSUES_ROOT || process.cwd();
-  const found = findIssuesDirUpward(startDir);
-  if (found) {
-    return found;
-  }
-  
-  // 3. If in a git repo, use .issues at the repo root
-  const gitRoot = findGitRoot(startDir);
-  if (gitRoot) {
-    return join(gitRoot, ".issues");
-  }
-  
-  // 4. Fall back to creating in start directory
-  return join(resolve(startDir), ".issues");
+	// 1. Explicit override
+	if (process.env.ISSUES_DIR) {
+		return resolve(process.env.ISSUES_DIR)
+	}
+
+	// 2. Try to find existing .issues by walking up
+	const startDir = process.env.ISSUES_ROOT || process.cwd()
+	const found = findIssuesDirUpward(startDir)
+	if (found) {
+		return found
+	}
+
+	// 3. If in a git repo, use .issues at the repo root
+	const gitRoot = findGitRoot(startDir)
+	if (gitRoot) {
+		return join(gitRoot, '.issues')
+	}
+
+	// 4. Fall back to creating in start directory
+	return join(resolve(startDir), '.issues')
 }
 
-const issuesDir = resolveIssuesDir();
+const issuesDir = resolveIssuesDir()
 // Set env vars for downstream consumers
-process.env.ISSUES_DIR = issuesDir;
+process.env.ISSUES_DIR = issuesDir
 // Set ISSUES_ROOT to the parent of .issues for consistency
-process.env.ISSUES_ROOT = dirname(issuesDir);
+process.env.ISSUES_ROOT = dirname(issuesDir)
 
-if (cliCommands.has(args[0] || "")) {
-  const here = resolve(fileURLToPath(import.meta.url), "..");
-  const entry = resolve(here, "..", "dist", "cli.js");
-  process.argv = [process.argv[0], process.argv[1], ...args];
-  const cli = await import(entry);
-  await cli.ready;  // Wait for main() to complete before exiting
-  process.exit(0);
+if (cliCommands.has(args[0] || '')) {
+	const here = resolve(fileURLToPath(import.meta.url), '..')
+	const entry = resolve(here, '..', 'dist', 'cli.js')
+	process.argv = [process.argv[0], process.argv[1], ...args]
+	const cli = await import(entry)
+	await cli.ready // Wait for main() to complete before exiting
+	process.exit(0)
 }
 
-const portIdx = args.findIndex((arg) => arg === "--port" || arg === "-p");
+const portIdx = args.findIndex(arg => arg === '--port' || arg === '-p')
 if (portIdx >= 0 && args[portIdx + 1]) {
-  process.env.ISSUES_PORT = args[portIdx + 1];
+	process.env.ISSUES_PORT = args[portIdx + 1]
 }
 
-const shouldInitOnly = args.includes("init");
-const skipSeed = args.includes("--no-seed");
+const shouldInitOnly = args.includes('init')
+const shouldSeed = args.includes('--seed')
 
-if (!existsSync(issuesDir)) {
-  mkdirSync(issuesDir, { recursive: true });
-}
-
-if (!skipSeed) {
-  const hasIssues =
-    existsSync(issuesDir) && readdirSync(issuesDir).some((f) => f.endsWith(".md"));
-  if (!hasIssues) {
-    const welcome = `---\n` +
-      `title: Welcome to issy\n` +
-      `description: Your first issue in this repo\n` +
-      `priority: medium\n` +
-      `type: improvement\n` +
-      `status: open\n` +
-      `created: ${new Date().toISOString().slice(0, 19)}\n` +
-      `---\n\n` +
-      `## Details\n\n` +
-      `- This issue was created automatically on first run.\n` +
-      `- Edit it, close it, or delete it to get started.\n`;
-    writeFileSync(join(issuesDir, "0001-welcome-to-issy.md"), welcome);
-  }
-}
-
+// Only create .issues directory on explicit 'init' command
 if (shouldInitOnly) {
-  console.log(`Initialized ${issuesDir}`);
-  process.exit(0);
+	if (!existsSync(issuesDir)) {
+		mkdirSync(issuesDir, { recursive: true })
+	}
+	
+	// Only seed with welcome issue if --seed flag is passed
+	if (shouldSeed) {
+		const hasIssues =
+			existsSync(issuesDir) &&
+			readdirSync(issuesDir).some(f => f.endsWith('.md'))
+		if (!hasIssues) {
+			const welcome =
+				`---\n` +
+				`title: Welcome to issy\n` +
+				`description: Your first issue in this repo\n` +
+				`priority: medium\n` +
+				`type: improvement\n` +
+				`status: open\n` +
+				`created: ${new Date().toISOString().slice(0, 19)}\n` +
+				`---\n\n` +
+				`## Details\n\n` +
+				`- This issue was created automatically on first run.\n` +
+				`- Edit it, close it, or delete it to get started.\n`
+			writeFileSync(join(issuesDir, '0001-welcome-to-issy.md'), welcome)
+		}
+	}
+	
+	console.log(`Initialized ${issuesDir}`)
+	process.exit(0)
 }
 
 // Start the server
-await import("@miketromba/issy-app");
+await import('@miketromba/issy-app')
