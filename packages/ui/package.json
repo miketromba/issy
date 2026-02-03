@@ -19,7 +19,8 @@
   },
   "scripts": {
     "dev": "bun --hot src/index.ts",
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "lint": "biome check src"
   },
   "exports": {
     ".": "./src/index.ts"

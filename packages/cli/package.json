@@ -25,7 +25,8 @@
     "src"
   ],
   "scripts": {
-    "cli": "bun src/cli.ts"
+    "cli": "bun src/cli.ts",
+    "lint": "biome check src bin"
   },
   "dependencies": {
     "@miketromba/issy-app": "^0.1.0",

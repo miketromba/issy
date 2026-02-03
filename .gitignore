@@ -10,3 +10,4 @@ bun.lockb
 # Build artifacts
 .dist/
 .cache/
+.turbo/

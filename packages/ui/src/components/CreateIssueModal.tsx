@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 
 interface CreateIssueModalProps {
   isOpen: boolean
@@ -6,7 +7,11 @@ interface CreateIssueModalProps {
   onCreated: () => void
 }
 
-export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModalProps) {
+export function CreateIssueModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateIssueModalProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<'bug' | 'improvement'>('improvement')
@@ -19,7 +24,7 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!title.trim()) {
       setError('Title is required')
       return
@@ -68,7 +73,7 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
@@ -79,7 +84,14 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
             onClick={onClose}
             className="text-text-muted hover:text-text-primary transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -93,19 +105,22 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
           )}
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1.5">Title *</label>
+            <label className="block text-sm text-text-secondary mb-1.5">
+              Title *
+            </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Brief description of the issue"
-              autoFocus
               className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1.5">Description</label>
+            <label className="block text-sm text-text-secondary mb-1.5">
+              Description
+            </label>
             <input
               type="text"
               value={description}
@@ -117,10 +132,14 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Type</label>
+              <label className="block text-sm text-text-secondary mb-1.5">
+                Type
+              </label>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as 'bug' | 'improvement')}
+                onChange={(e) =>
+                  setType(e.target.value as 'bug' | 'improvement')
+                }
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent"
               >
                 <option value="improvement">Improvement</option>
@@ -129,10 +148,14 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
             </div>
 
             <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Priority</label>
+              <label className="block text-sm text-text-secondary mb-1.5">
+                Priority
+              </label>
               <select
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as 'high' | 'medium' | 'low')}
+                onChange={(e) =>
+                  setPriority(e.target.value as 'high' | 'medium' | 'low')
+                }
                 className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent"
               >
                 <option value="high">High</option>
@@ -143,7 +166,9 @@ export function CreateIssueModal({ isOpen, onClose, onCreated }: CreateIssueModa
           </div>
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1.5">Labels</label>
+            <label className="block text-sm text-text-secondary mb-1.5">
+              Labels
+            </label>
             <input
               type="text"
               value={labels}

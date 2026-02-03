@@ -49,15 +49,15 @@
 
 /* Code block styling - remove borders, unify background, add dark scrollbar */
 .prose pre {
-  border: none !important;
-  box-shadow: none !important;
-  background-color: var(--color-surface-elevated) !important;
+  border: none;
+  box-shadow: none;
+  background-color: var(--color-surface-elevated);
 }
 
 .prose pre code.hljs {
-  background: transparent !important;
-  padding: 0 !important;
-  font-size: 13px !important;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
 }
 
 .prose pre::-webkit-scrollbar {

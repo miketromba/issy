@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 
 interface ConfirmModalProps {
   isOpen: boolean
@@ -29,12 +29,13 @@ export function ConfirmModal({
     }
   }
 
-  const confirmStyles = confirmVariant === 'danger'
-    ? 'bg-red-500 hover:bg-red-600 text-white'
-    : 'bg-accent hover:bg-accent-hover text-white'
+  const confirmStyles =
+    confirmVariant === 'danger'
+      ? 'bg-red-500 hover:bg-red-600 text-white'
+      : 'bg-accent hover:bg-accent-hover text-white'
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >

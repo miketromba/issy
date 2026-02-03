@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { parseQuery } from '@miketromba/issy-core'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Issue } from '../App'
 
 interface FilterBarProps {
@@ -29,7 +29,7 @@ function Dropdown({ label, value, options, onSelect }: DropdownProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const selectedOption = options.find(o => o.value === value)
+  const selectedOption = options.find((o) => o.value === value)
 
   return (
     <div ref={ref} className="relative">
@@ -42,7 +42,14 @@ function Dropdown({ label, value, options, onSelect }: DropdownProps) {
         }`}
       >
         <span>{selectedOption ? selectedOption.label : label}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
@@ -52,7 +59,10 @@ function Dropdown({ label, value, options, onSelect }: DropdownProps) {
           {value && (
             <>
               <button
-                onClick={() => { onSelect(null); setIsOpen(false) }}
+                onClick={() => {
+                  onSelect(null)
+                  setIsOpen(false)
+                }}
                 className="w-full px-3 py-1.5 text-left text-xs text-text-muted hover:bg-surface hover:text-text-primary"
               >
                 Clear
@@ -60,12 +70,17 @@ function Dropdown({ label, value, options, onSelect }: DropdownProps) {
               <div className="border-t border-border my-1" />
             </>
           )}
-          {options.map(option => (
+          {options.map((option) => (
             <button
               key={option.value}
-              onClick={() => { onSelect(option.value); setIsOpen(false) }}
+              onClick={() => {
+                onSelect(option.value)
+                setIsOpen(false)
+              }}
               className={`w-full px-3 py-1.5 text-left text-xs hover:bg-surface ${
-                value === option.value ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
+                value === option.value
+                  ? 'text-accent'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {option.label}
@@ -91,16 +106,19 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-function extractUniqueValues(issues: Issue[], key: keyof Issue['frontmatter']): { value: string; label: string }[] {
+function extractUniqueValues(
+  issues: Issue[],
+  key: keyof Issue['frontmatter'],
+): { value: string; label: string }[] {
   const values = new Set<string>()
-  
+
   for (const issue of issues) {
     const val = issue.frontmatter[key]
     if (val && typeof val === 'string') {
       values.add(val.toLowerCase())
     }
   }
-  
+
   return Array.from(values)
     .sort((a, b) => {
       // Special sort for priority
@@ -109,39 +127,48 @@ function extractUniqueValues(issues: Issue[], key: keyof Issue['frontmatter']): 
       }
       return a.localeCompare(b)
     })
-    .map(v => ({ value: v, label: capitalize(v) }))
+    .map((v) => ({ value: v, label: capitalize(v) }))
 }
 
 export function FilterBar({ query, onQueryChange, issues }: FilterBarProps) {
   const parsed = parseQuery(query)
-  
+
   // Dynamically extract options from actual issue data
-  const statusOptions = useMemo(() => extractUniqueValues(issues, 'status'), [issues])
-  const priorityOptions = useMemo(() => extractUniqueValues(issues, 'priority'), [issues])
-  const typeOptions = useMemo(() => extractUniqueValues(issues, 'type'), [issues])
-  
+  const statusOptions = useMemo(
+    () => extractUniqueValues(issues, 'status'),
+    [issues],
+  )
+  const priorityOptions = useMemo(
+    () => extractUniqueValues(issues, 'priority'),
+    [issues],
+  )
+  const typeOptions = useMemo(
+    () => extractUniqueValues(issues, 'type'),
+    [issues],
+  )
+
   const updateQualifier = (key: string, value: string | null) => {
     const newQualifiers = { ...parsed.qualifiers }
-    
+
     if (value === null) {
       delete newQualifiers[key]
     } else {
       newQualifiers[key] = value
     }
-    
+
     // Rebuild query string
     const parts: string[] = []
-    
+
     // Add qualifiers in consistent order
     if (newQualifiers.is) parts.push(`is:${newQualifiers.is}`)
     if (newQualifiers.priority) parts.push(`priority:${newQualifiers.priority}`)
     if (newQualifiers.type) parts.push(`type:${newQualifiers.type}`)
     if (newQualifiers.label) parts.push(`label:${newQualifiers.label}`)
     if (newQualifiers.sort) parts.push(`sort:${newQualifiers.sort}`)
-    
+
     // Add search text at the end
     if (parsed.searchText) parts.push(parsed.searchText)
-    
+
     onQueryChange(parts.join(' '))
   }
 

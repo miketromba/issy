@@ -18,7 +18,8 @@
     "access": "public"
   },
   "scripts": {
-    "test": "bun test"
+    "test": "bun test",
+    "lint": "biome check src"
   },
   "exports": {
     ".": "./src/lib/index.ts"
