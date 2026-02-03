@@ -1,6 +1,6 @@
 {
   "name": "@miketromba/issy-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local web UI and API server for issy",
   "type": "module",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "bunfig.toml"
   ],
   "dependencies": {
-    "@miketromba/issy-core": "^0.1.0",
+    "@miketromba/issy-core": "^0.1.1",
     "@tailwindcss/typography": "^0.5.16",
     "bun-plugin-tailwind": "^0.1.2",
     "highlight.js": "^11.11.1",
