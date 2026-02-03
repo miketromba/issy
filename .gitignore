@@ -1,0 +1,12 @@
+node_modules/
+.tmp/
+.DS_Store
+.env
+bun.lockb
+
+# Logs
+*.log
+
+# Build artifacts
+.dist/
+.cache/

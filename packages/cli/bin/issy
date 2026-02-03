@@ -1,0 +1,67 @@
+#!/usr/bin/env bun
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const args = process.argv.slice(2);
+const cliCommands = new Set([
+  "list",
+  "search",
+  "read",
+  "create",
+  "update",
+  "close",
+  "help",
+  "--help",
+  "-h",
+]);
+const root = process.env.ISSUES_ROOT ?? process.cwd();
+const issuesDir = process.env.ISSUES_DIR ?? join(root, ".issues");
+process.env.ISSUES_ROOT = root;
+process.env.ISSUES_DIR = issuesDir;
+
+if (cliCommands.has(args[0] || "")) {
+  const here = resolve(fileURLToPath(import.meta.url), "..");
+  const entry = resolve(here, "..", "src", "cli.ts");
+  process.argv = [process.argv[0], process.argv[1], ...args];
+  await import(entry);
+  process.exit(0);
+}
+
+const portIdx = args.findIndex((arg) => arg === "--port" || arg === "-p");
+if (portIdx >= 0 && args[portIdx + 1]) {
+  process.env.ISSUES_PORT = args[portIdx + 1];
+}
+
+const shouldInitOnly = args.includes("init");
+const skipSeed = args.includes("--no-seed");
+
+if (!existsSync(issuesDir)) {
+  mkdirSync(issuesDir, { recursive: true });
+}
+
+if (!skipSeed) {
+  const hasIssues =
+    existsSync(issuesDir) && readdirSync(issuesDir).some((f) => f.endsWith(".md"));
+  if (!hasIssues) {
+    const welcome = `---\n` +
+      `title: Welcome to issy\n` +
+      `description: Your first issue in this repo\n` +
+      `priority: medium\n` +
+      `type: improvement\n` +
+      `status: open\n` +
+      `created: ${new Date().toISOString().slice(0, 19)}\n` +
+      `---\n\n` +
+      `## Details\n\n` +
+      `- This issue was created automatically on first run.\n` +
+      `- Edit it, close it, or delete it to get started.\n`;
+    writeFileSync(join(issuesDir, "0001-welcome-to-issy.md"), welcome);
+  }
+}
+
+if (shouldInitOnly) {
+  console.log(`Initialized ${issuesDir}`);
+  process.exit(0);
+}
+
+await import("@issy/app");

@@ -1,0 +1,25 @@
+{
+  "name": "issy-monorepo",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miketromba/issy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/miketromba/issy/issues"
+  },
+  "homepage": "https://github.com/miketromba/issy#readme",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}

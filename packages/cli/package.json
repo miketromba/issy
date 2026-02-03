@@ -1,0 +1,34 @@
+{
+  "name": "issy",
+  "version": "0.1.0",
+  "description": "Drop-in issue tracking CLI plus local web UI backed by markdown in .issues",
+  "type": "module",
+  "license": "MIT",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miketromba/issy.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/miketromba/issy/issues"
+  },
+  "homepage": "https://github.com/miketromba/issy#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "issy": "bin/issy"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "cli": "bun src/cli.ts"
+  },
+  "dependencies": {
+    "@issy/app": "workspace:*",
+    "@issy/core": "workspace:*"
+  }
+}

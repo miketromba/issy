@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  /* Core palette - dark theme */
+  --color-background: #0a0b0f;
+  --color-surface: #12141a;
+  --color-surface-elevated: #1a1c24;
+  --color-border: #2a2d38;
+  --color-border-subtle: #1e2028;
+  
+  /* Text hierarchy */
+  --color-text-primary: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  
+  /* Accent - warm coral */
+  --color-accent: #ff6b5b;
+  --color-accent-hover: #ff8577;
+  
+  /* Status colors */
+  --color-status-open: #22c55e;
+  --color-status-closed: #6b7280;
+  
+  /* Priority colors */
+  --color-priority-high: #ef4444;
+  --color-priority-medium: #f59e0b;
+  --color-priority-low: #22c55e;
+  
+  /* Type colors */
+  --color-type-default: #a78bfa;
+  --color-type-bug: #f87171;
+  --color-type-feature: #60a5fa;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+/* Code block styling - remove borders, unify background, add dark scrollbar */
+.prose pre {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: var(--color-surface-elevated) !important;
+}
+
+.prose pre code.hljs {
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+}
+
+.prose pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+.prose pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prose pre::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.prose pre::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Firefox scrollbar */
+.prose pre {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* Line clamp utility for title */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
