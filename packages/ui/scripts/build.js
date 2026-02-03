@@ -51,11 +51,11 @@ for (const output of frontendBuild.outputs) {
 
 console.log('Building CSS...')
 
-// Build Tailwind CSS
+// Build Tailwind CSS using npx (not bunx - avoids jiti bundling issues)
 try {
 	execSync(
-		`bunx tailwindcss -i ${join(srcDir, 'index.css')} -o ${join(distDir, 'styles.css')} --minify`,
-		{ stdio: 'inherit' }
+		`npx tailwindcss -i ${join(srcDir, 'index.css')} -o ${join(distDir, 'styles.css')} --minify`,
+		{ stdio: 'inherit', cwd: join(__dirname, '..') }
 	)
 } catch (e) {
 	// Fallback: copy the CSS file as-is if tailwind CLI fails
