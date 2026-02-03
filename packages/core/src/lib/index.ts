@@ -18,6 +18,7 @@ export {
   createSlug,
   deleteIssue,
   ensureIssuesDir,
+  findGitRoot,
   findIssuesDirUpward,
   formatDate,
   generateFrontmatter,

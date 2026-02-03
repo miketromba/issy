@@ -62,10 +62,29 @@ export function findIssuesDirUpward(fromPath: string): string | null {
 }
 
 /**
+ * Find the git repository root by walking up from the given path.
+ * Returns the directory containing .git, or null if not in a git repo.
+ */
+export function findGitRoot(fromPath: string): string | null {
+  let current = resolve(fromPath)
+  for (let i = 0; i < 20; i++) {
+    const gitDir = join(current, '.git')
+    if (existsSync(gitDir)) {
+      return current
+    }
+    const parent = dirname(current)
+    if (parent === current) break // reached filesystem root
+    current = parent
+  }
+  return null
+}
+
+/**
  * Resolve the issues directory using the following priority:
  * 1. ISSUES_DIR env var (explicit override)
  * 2. Walk up from ISSUES_ROOT or cwd to find existing .issues directory
- * 3. Fall back to creating .issues in ISSUES_ROOT or cwd
+ * 3. If in a git repo, use .issues at the repo root
+ * 4. Fall back to creating .issues in ISSUES_ROOT or cwd
  *
  * This also sets the internal issuesDir variable.
  */
@@ -85,7 +104,15 @@ export function resolveIssuesDir(): string {
     return found
   }
 
-  // 3. Fall back to creating .issues in the start directory
+  // 3. If in a git repo, use .issues at the repo root
+  const gitRoot = findGitRoot(startDir)
+  if (gitRoot) {
+    const gitIssuesDir = join(gitRoot, '.issues')
+    setIssuesDir(gitIssuesDir)
+    return gitIssuesDir
+  }
+
+  // 4. Fall back to creating .issues in the start directory
   const fallback = join(resolve(startDir), '.issues')
   setIssuesDir(fallback)
   return fallback

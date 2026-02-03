@@ -36,10 +36,29 @@ function findIssuesDirUpward(fromPath) {
 }
 
 /**
+ * Find the git repository root by walking up from the given path.
+ * Returns the directory containing .git, or null if not in a git repo.
+ */
+function findGitRoot(fromPath) {
+  let current = resolve(fromPath);
+  for (let i = 0; i < 20; i++) {
+    const gitDir = join(current, ".git");
+    if (existsSync(gitDir)) {
+      return current;
+    }
+    const parent = dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  return null;
+}
+
+/**
  * Resolve the issues directory using priority:
  * 1. ISSUES_DIR env var (explicit override)
  * 2. Walk up from ISSUES_ROOT or cwd to find existing .issues
- * 3. Fall back to creating .issues in ISSUES_ROOT or cwd
+ * 3. If in a git repo, use .issues at the repo root
+ * 4. Fall back to creating .issues in ISSUES_ROOT or cwd
  */
 function resolveIssuesDir() {
   // 1. Explicit override
@@ -54,7 +73,13 @@ function resolveIssuesDir() {
     return found;
   }
   
-  // 3. Fall back to creating in start directory
+  // 3. If in a git repo, use .issues at the repo root
+  const gitRoot = findGitRoot(startDir);
+  if (gitRoot) {
+    return join(gitRoot, ".issues");
+  }
+  
+  // 4. Fall back to creating in start directory
   return join(resolve(startDir), ".issues");
 }
 
