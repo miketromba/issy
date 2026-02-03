@@ -1,6 +1,6 @@
 {
   "name": "issy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI-native issue tracking. Markdown files in .issues/, managed by your coding assistant.",
   "type": "module",
   "license": "MIT",
@@ -22,14 +22,19 @@
   },
   "files": [
     "bin",
-    "src"
+    "dist"
   ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
+    "build": "bun build src/cli.ts --outdir dist --target node --format esm --external @miketromba/issy-app",
+    "prepublishOnly": "bun run build",
     "cli": "bun src/cli.ts",
     "lint": "biome check src bin"
   },
   "dependencies": {
-    "@miketromba/issy-app": "^0.1.1",
+    "@miketromba/issy-app": "^0.1.2",
     "@miketromba/issy-core": "^0.1.1"
   }
 }

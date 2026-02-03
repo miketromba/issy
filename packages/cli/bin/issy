@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,7 @@ process.env.ISSUES_DIR = issuesDir;
 
 if (cliCommands.has(args[0] || "")) {
   const here = resolve(fileURLToPath(import.meta.url), "..");
-  const entry = resolve(here, "..", "src", "cli.ts");
+  const entry = resolve(here, "..", "dist", "cli.js");
   process.argv = [process.argv[0], process.argv[1], ...args];
   await import(entry);
   process.exit(0);
@@ -64,4 +64,5 @@ if (shouldInitOnly) {
   process.exit(0);
 }
 
+// Start the server
 await import("@miketromba/issy-app");

@@ -1,7 +1,6 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
-@theme {
+:root {
   /* Core palette - dark theme */
   --color-background: #0a0b0f;
   --color-surface: #12141a;
