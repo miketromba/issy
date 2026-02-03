@@ -5,7 +5,6 @@
  * Bundles the React frontend, CSS, and server for production using Bun's bundler
  */
 
-import { execSync } from 'node:child_process'
 import { mkdirSync, writeFileSync, cpSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -51,15 +50,14 @@ for (const output of frontendBuild.outputs) {
 
 console.log('Building CSS...')
 
-// Build Tailwind CSS using npx (not bunx - avoids jiti bundling issues)
+// Build Tailwind CSS using Bun's native shell (avoids bundler interference)
+const uiDir = join(__dirname, '..')
 try {
-	execSync(
-		`npx tailwindcss -i ${join(srcDir, 'index.css')} -o ${join(distDir, 'styles.css')} --minify`,
-		{ stdio: 'inherit', cwd: join(__dirname, '..') }
-	)
+	await Bun.$`cd ${uiDir} && npx tailwindcss -i ${join(srcDir, 'index.css')} -o ${join(distDir, 'styles.css')} --minify`.quiet()
+	console.log('Tailwind CSS built successfully')
 } catch (e) {
 	// Fallback: copy the CSS file as-is if tailwind CLI fails
-	console.log('Tailwind CLI not available, using raw CSS')
+	console.log('Tailwind CLI failed, using raw CSS')
 	cpSync(join(srcDir, 'index.css'), join(distDir, 'styles.css'))
 }
 

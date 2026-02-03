@@ -19,7 +19,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "publish:all": "cd packages/core && npm publish --access public && cd ../ui && bun run build && npm publish --access public && cd ../cli && bun run build && npm publish --access public"
+    "publish:all": "turbo run lint build && npm publish --access public -w @miketromba/issy-core && npm publish --access public -w @miketromba/issy-app && npm publish --access public -w issy"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.13",

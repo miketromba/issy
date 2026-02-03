@@ -1,10 +1,11 @@
 /**
  * issy Frontend Entry Point
+ * Note: CSS is loaded separately via <link> tag, not imported here
+ * to avoid Bun bundling issues with Tailwind's jiti dependency
  */
 
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
-import './index.css'
 
 function start() {
   const container = document.getElementById('root')
