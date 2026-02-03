@@ -29,7 +29,7 @@
     "bunfig.toml"
   ],
   "dependencies": {
-    "@issy/core": "workspace:*",
+    "@issy/core": "^0.1.0",
     "@tailwindcss/typography": "^0.5.16",
     "bun-plugin-tailwind": "^0.1.2",
     "highlight.js": "^11.11.1",

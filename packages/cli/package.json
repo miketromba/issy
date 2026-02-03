@@ -28,7 +28,7 @@
     "cli": "bun src/cli.ts"
   },
   "dependencies": {
-    "@issy/app": "workspace:*",
-    "@issy/core": "workspace:*"
+    "@issy/app": "^0.1.0",
+    "@issy/core": "^0.1.0"
   }
 }
