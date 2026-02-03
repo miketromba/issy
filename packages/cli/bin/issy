@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { dirname } from "node:path";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,10 +16,53 @@ const cliCommands = new Set([
   "--help",
   "-h",
 ]);
-const root = process.env.ISSUES_ROOT ?? process.cwd();
-const issuesDir = process.env.ISSUES_DIR ?? join(root, ".issues");
-process.env.ISSUES_ROOT = root;
+
+/**
+ * Find .issues directory by walking up from the given path.
+ * Returns the path if found, or null if not found.
+ */
+function findIssuesDirUpward(fromPath) {
+  let current = resolve(fromPath);
+  for (let i = 0; i < 20; i++) {
+    const candidate = join(current, ".issues");
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+    const parent = dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  return null;
+}
+
+/**
+ * Resolve the issues directory using priority:
+ * 1. ISSUES_DIR env var (explicit override)
+ * 2. Walk up from ISSUES_ROOT or cwd to find existing .issues
+ * 3. Fall back to creating .issues in ISSUES_ROOT or cwd
+ */
+function resolveIssuesDir() {
+  // 1. Explicit override
+  if (process.env.ISSUES_DIR) {
+    return resolve(process.env.ISSUES_DIR);
+  }
+  
+  // 2. Try to find existing .issues by walking up
+  const startDir = process.env.ISSUES_ROOT || process.cwd();
+  const found = findIssuesDirUpward(startDir);
+  if (found) {
+    return found;
+  }
+  
+  // 3. Fall back to creating in start directory
+  return join(resolve(startDir), ".issues");
+}
+
+const issuesDir = resolveIssuesDir();
+// Set env vars for downstream consumers
 process.env.ISSUES_DIR = issuesDir;
+// Set ISSUES_ROOT to the parent of .issues for consistency
+process.env.ISSUES_ROOT = dirname(issuesDir);
 
 if (cliCommands.has(args[0] || "")) {
   const here = resolve(fileURLToPath(import.meta.url), "..");

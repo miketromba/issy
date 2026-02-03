@@ -12,7 +12,6 @@
  *   issy close <id>
  */
 
-import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 
 // Import shared library (simple relative import since we're in the same package)
@@ -23,14 +22,15 @@ import {
   filterAndSearchIssues,
   getAllIssues,
   getIssue,
-  setIssuesDir,
+  resolveIssuesDir,
   updateIssue,
 } from '@miketromba/issy-core'
 
-// Initialize issues directory from env or current working directory
-const DEFAULT_ROOT = process.env.ISSUES_ROOT || process.cwd()
-const ISSUES_DIR = process.env.ISSUES_DIR || join(DEFAULT_ROOT, '.issues')
-setIssuesDir(ISSUES_DIR)
+// Initialize issues directory with smart resolution:
+// 1. ISSUES_DIR env var (explicit override)
+// 2. Walk up from cwd to find existing .issues directory
+// 3. Fall back to cwd/.issues
+resolveIssuesDir()
 
 // Display helpers
 function prioritySymbol(priority: string): string {

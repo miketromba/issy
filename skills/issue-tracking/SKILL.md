@@ -3,7 +3,7 @@ name: issue-tracking
 description: Project issue tracking system. Use when creating, reading, updating, listing, or closing issues. Triggers on "create an issue", "add a bug", "track a task", "list issues", "show bugs", "what's open", "close issue", or any issue/bug/task management request.
 ---
 
-# Issue Tracking
+# Issue Tracking with the `issy` CLI
 
 ## Authoring Issues
 

@@ -3,8 +3,9 @@
  * This is the shared library used by both the API and CLI
  */
 
+import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import type {
   CreateIssueInput,
   Issue,
@@ -28,7 +29,7 @@ export function setIssuesDir(dir: string) {
 export function getIssuesDir(): string {
   if (!issuesDir) {
     throw new Error(
-      'Issues directory not initialized. Call setIssuesDir() first.',
+      'Issues directory not initialized. Call setIssuesDir() or resolveIssuesDir() first.',
     )
   }
   return issuesDir
@@ -42,24 +43,61 @@ export async function ensureIssuesDir(): Promise<void> {
 }
 
 /**
- * Auto-detect issues directory from common locations
+ * Try to find .issues directory by walking up from the given path.
+ * Returns the path if found, or null if not found.
  */
-export function autoDetectIssuesDir(fromPath: string): string {
-  // Try to find .issues directory by walking up from the given path
-  const { resolve, dirname } = require('node:path')
-  const { existsSync } = require('node:fs')
-
+export function findIssuesDirUpward(fromPath: string): string | null {
   let current = resolve(fromPath)
-  for (let i = 0; i < 10; i++) {
+  // Walk up to 20 levels (reasonable for most project structures)
+  for (let i = 0; i < 20; i++) {
     const candidate = join(current, '.issues')
     if (existsSync(candidate)) {
       return candidate
     }
     const parent = dirname(current)
-    if (parent === current) break
+    if (parent === current) break // reached filesystem root
     current = parent
   }
+  return null
+}
 
+/**
+ * Resolve the issues directory using the following priority:
+ * 1. ISSUES_DIR env var (explicit override)
+ * 2. Walk up from ISSUES_ROOT or cwd to find existing .issues directory
+ * 3. Fall back to creating .issues in ISSUES_ROOT or cwd
+ *
+ * This also sets the internal issuesDir variable.
+ */
+export function resolveIssuesDir(): string {
+  // 1. Explicit override via ISSUES_DIR
+  if (process.env.ISSUES_DIR) {
+    const dir = resolve(process.env.ISSUES_DIR)
+    setIssuesDir(dir)
+    return dir
+  }
+
+  // 2. Try to find existing .issues by walking up from start directory
+  const startDir = process.env.ISSUES_ROOT || process.cwd()
+  const found = findIssuesDirUpward(startDir)
+  if (found) {
+    setIssuesDir(found)
+    return found
+  }
+
+  // 3. Fall back to creating .issues in the start directory
+  const fallback = join(resolve(startDir), '.issues')
+  setIssuesDir(fallback)
+  return fallback
+}
+
+/**
+ * Auto-detect issues directory from common locations
+ * @deprecated Use resolveIssuesDir() instead, which handles all cases
+ */
+export function autoDetectIssuesDir(fromPath: string): string {
+  const found = findIssuesDirUpward(fromPath)
+  if (found) return found
   throw new Error('Could not find .issues directory')
 }
 

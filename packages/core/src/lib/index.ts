@@ -18,6 +18,7 @@ export {
   createSlug,
   deleteIssue,
   ensureIssuesDir,
+  findIssuesDirUpward,
   formatDate,
   generateFrontmatter,
   getAllIssues,
@@ -28,6 +29,7 @@ export {
   getNextIssueNumber,
   parseFrontmatter,
   reopenIssue,
+  resolveIssuesDir,
   setIssuesDir,
   updateIssue,
 } from './issues'

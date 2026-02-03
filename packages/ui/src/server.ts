@@ -19,15 +19,16 @@ import {
   getAllIssues,
   getIssue,
   reopenIssue,
-  setIssuesDir,
+  resolveIssuesDir,
   type UpdateIssueInput,
   updateIssue,
 } from '@miketromba/issy-core'
 
-// Initialize issues directory from env or current working directory
-const DEFAULT_ROOT = process.env.ISSUES_ROOT || process.cwd()
-const ISSUES_DIR = process.env.ISSUES_DIR || resolve(DEFAULT_ROOT, '.issues')
-setIssuesDir(ISSUES_DIR)
+// Initialize issues directory with smart resolution:
+// 1. ISSUES_DIR env var (explicit override)
+// 2. Walk up from cwd to find existing .issues directory
+// 3. Fall back to cwd/.issues
+resolveIssuesDir()
 
 const PORT = Number(process.env.ISSUES_PORT || process.env.PORT || 1554)
 
