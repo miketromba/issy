@@ -406,7 +406,8 @@ Examples:
   }
 }
 
-main().catch((err) => {
+// Export the promise so bin/issy can await it before exiting
+export const ready = main().catch((err) => {
   console.error(err)
   process.exit(1)
 })
