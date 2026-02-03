@@ -1,32 +1,46 @@
-# issy (CLI)
+# issy
 
-`issy` is a tiny CLI + local UI starter for markdown‑based issue tracking.
+AI-native issue tracking. Tell your coding assistant what to track — it handles the rest.
 
-## Install / Run
+Issues are stored as markdown files in `.issues/`, committed with your code.
 
-```bash
-npx -y issy
-```
-
-Starts the local UI and API server (default: `http://localhost:3006`).
-
-## CLI Commands
+## Install the Skill
 
 ```bash
-issy list
-issy search "login"
-issy read 0001
-issy create --title "Fix login" --type bug --priority high
-issy update 0001 --status closed
-issy close 0001
+npx skills add miketromba/issy
 ```
 
-## Environment Variables
+Your AI assistant can now create, search, update, and close issues through natural language.
 
-- `ISSUES_ROOT`: root directory to look for `.issues` (default: cwd)
-- `ISSUES_DIR`: explicit issues directory (overrides `ISSUES_ROOT`)
-- `ISSUES_PORT`: server port for the UI/API
+## Manual Usage
 
-## Repository
+### Web UI
 
-Full source and documentation live in the monorepo.
+```bash
+npx issy
+```
+
+Opens a local UI at `http://localhost:1554`.
+
+### CLI
+
+```bash
+issy list                     # List open issues
+issy search "auth"            # Fuzzy search
+issy read 0001                # View issue
+issy create --title "Bug"     # Create issue
+issy close 0001               # Close issue
+```
+
+Run `issy help` for full options.
+
+## Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ISSUES_DIR` | Issues directory path | `./.issues` |
+| `ISSUES_PORT` | UI server port | `1554` |
+
+## License
+
+MIT

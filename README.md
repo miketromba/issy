@@ -1,87 +1,122 @@
 <p align="center">
-  <img src="assets/issy-logo.png" alt="issy logo" width="600" />
+  <img src="assets/issy-logo.png" alt="issy" width="600" />
 </p>
 
-# issy
+<p align="center">
+  <a href="https://www.npmjs.com/package/issy"><img src="https://img.shields.io/npm/v/issy.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/issy"><img src="https://img.shields.io/npm/dm/issy.svg" alt="npm downloads"></a>
+  <a href="https://github.com/miketromba/issy/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/issy.svg" alt="license"></a>
+</p>
 
-Drop-in issue tracking for any repo: a local web UI plus a CLI that stores issues as markdown in `.issues/`.
+<p align="center">
+  <strong>AI-native issue tracking.</strong><br>
+  Tell your coding assistant what to track. It handles the rest.
+</p>
 
-## Quick Start (UI)
-
-Requires Bun (`bun --version`).
-
-```bash
-npx -y issy
-```
-
-This will:
-- Create `.issues/` if missing
-- Seed a welcome issue (skip with `--no-seed`)
-- Start the UI at `http://localhost:3006`
-
-Initialize only:
-
-```bash
-npx -y issy init
-```
-
-### Pick a Port
-
-```bash
-npx -y issy --port 3010
-```
-
-## CLI (Issue CRUD)
-
-If the `issues` CLI is installed globally, use it directly:
-
-```bash
-issy list
-issy create --title "Fix login bug" --type bug --priority high
-```
-
-If not, run via npx:
-
-```bash
-npx -y issy list
-npx -y issy create --title "Add dark mode" --type improvement
-```
+---
 
 ## How It Works
 
-- Issues live in `.issues/` as markdown files with YAML frontmatter.
-- The UI reads and writes through a local API server.
-- The CLI manipulates the same files directly.
+issy gives AI coding assistants a skill for managing issues. Just talk naturally:
 
-### Environment Variables
+> "Create a bug for the login redirect issue, high priority"
 
-- `ISSUES_ROOT`: Root folder to look for `.issues` (default: `process.cwd()`)
-- `ISSUES_DIR`: Explicit path to the issues directory (overrides `ISSUES_ROOT`)
-- `ISSUES_PORT`: Port for the local UI server (default: `3006`)
+> "What issues are open?"
 
-## Monorepo Layout
+> "Close the auth bug, it's fixed"
 
-- `packages/ui`: Web UI + API server (`@issy/app`)
-- `packages/core`: Issue storage/search library (`@issy/core`)
-- `packages/cli`: Published CLI package (`issy`)
-- `skills/issue-tracking`: Skill entrypoint for skills.sh
+The assistant creates, searches, updates, and closes issues for you. Issues are stored as markdown files in `.issues/` — readable, diffable, and committed with your code.
 
-## Skill Installation
-
-This repo includes a skill at `skills/issue-tracking/SKILL.md`.
-
-Install it with the skills CLI (see skills.sh for details):
+## Install the Skill
 
 ```bash
-npx skills add <owner>/<repo>
+npx skills add miketromba/issy
 ```
 
-## Development
+That's it. Your AI assistant can now manage issues in any repo.
+
+## Why Markdown?
+
+- **Portable** — No vendor lock-in, no database, no accounts
+- **Git-native** — Issues travel with your code, appear in diffs and PRs
+- **Transparent** — AI agents can read and write issues directly
+- **Works offline** — No network dependency
+
+---
+
+## Manual Usage
+
+You can also manage issues directly when needed.
+
+### Web UI
 
 ```bash
-bun install
-bun run dev
+npx issy
 ```
+
+Opens a local UI at `http://localhost:1554` for browsing and editing issues.
+
+### CLI
+
+```bash
+issy list                     # List open issues
+issy search "auth"            # Fuzzy search
+issy read 0001                # View issue
+issy create --title "Bug"     # Create issue
+issy close 0001               # Close issue
+```
+
+Run `issy help` for full options.
+
+---
+
+## Issue Format
+
+```markdown
+---
+title: Fix login redirect
+description: Users get stuck after OAuth callback
+priority: high
+type: bug
+status: open
+created: 2025-01-15T10:30:00
+---
+
+## Problem
+
+After OAuth login, users are redirected to `/callback` but the
+session isn't established, causing a redirect loop.
+```
+
+| Field | Values |
+|-------|--------|
+| `priority` | `high`, `medium`, `low` |
+| `type` | `bug`, `improvement` |
+| `status` | `open`, `closed` |
+| `labels` | comma-separated (optional) |
+
+## Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ISSUES_DIR` | Issues directory path | `./.issues` |
+| `ISSUES_PORT` | UI server port | `1554` |
+
+<details>
+<summary><strong>Development</strong></summary>
+
+```
+packages/
+  cli/   → CLI (issy)
+  core/  → Storage library (@issy/core)
+  ui/    → Web UI + API (@issy/app)
+```
+
+```bash
+bun install && bun run dev
+```
+
+</details>
 
 ## License
 

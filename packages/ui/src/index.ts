@@ -30,7 +30,7 @@ const DEFAULT_ROOT = process.env.ISSUES_ROOT || process.cwd();
 const ISSUES_DIR = process.env.ISSUES_DIR || resolve(DEFAULT_ROOT, ".issues");
 setIssuesDir(ISSUES_DIR);
 
-const PORT = Number(process.env.ISSUES_PORT || process.env.PORT || 3006);
+const PORT = Number(process.env.ISSUES_PORT || process.env.PORT || 1554);
 
 const server = serve({
   port: PORT,

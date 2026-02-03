@@ -1,7 +1,7 @@
 {
   "name": "issy",
   "version": "0.1.0",
-  "description": "Drop-in issue tracking CLI plus local web UI backed by markdown in .issues",
+  "description": "AI-native issue tracking. Markdown files in .issues/, managed by your coding assistant.",
   "type": "module",
   "license": "MIT",
   "private": false,
