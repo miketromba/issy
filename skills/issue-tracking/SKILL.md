@@ -67,7 +67,7 @@ After deployment, `curl https://api.example.com/health` should return `{"status"
 
 ## CLI Commands
 
-Use the `issy` CLI (or `npx -y issy ...` if it's not on PATH).
+Use the `issy` CLI. If not installed globally, run `npm install issy --global` first (or use `npx issy` as a fallback).
 
 ```bash
 # List issues

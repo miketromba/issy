@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@miketromba/issy-app": "^0.2.0",
-    "@miketromba/issy-core": "^0.2.0"
+    "@miketromba/issy-core": "^0.2.0",
+    "update-notifier": "^7.3.1"
   }
 }

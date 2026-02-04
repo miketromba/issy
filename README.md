@@ -44,14 +44,64 @@ That's it. Your AI assistant can now manage issues in any repo.
 
 ---
 
-## Manual Usage
+## Installing `issy`
 
-You can also manage issues directly when needed.
+`issy` can be installed both globally **and** in your repository. We recommend installing both ways so you can take advantage of fast, convenient workflows *and* a stable version for all developers in your repository.
+
+### Global installation
+
+A global install of `issy` brings flexibility and speed to your local workflows.
+
+```bash
+# npm
+npm install issy --global
+
+# pnpm
+pnpm add issy --global
+
+# yarn
+yarn global add issy
+
+# bun
+bun install issy --global
+```
+
+Once installed globally, you can run commands from your terminal:
+
+```bash
+issy                          # Start the web UI
+issy list                     # List open issues
+issy create --title "Bug"     # Create issue
+```
+
+### Repository installation
+
+When collaborating with other developers, it's a good idea to pin versions. Add `issy` as a `devDependency` in the root of your repository:
+
+```bash
+# npm
+npm install issy --save-dev
+
+# pnpm
+pnpm add issy --save-dev --ignore-workspace-root-check
+
+# yarn
+yarn add issy --dev --ignore-workspace-root-check
+
+# bun
+bun add issy --dev
+```
+
+You can continue to use your global installation to run commands. Global `issy` will defer to the local version if it exists.
+
+---
+
+## Usage
 
 ### Web UI
 
 ```bash
-npx issy
+issy
 ```
 
 Opens a local UI at `http://localhost:1554` for browsing and editing issues.
@@ -70,6 +120,7 @@ issy search "auth"            # Fuzzy search
 issy read 0001                # View issue
 issy create --title "Bug"     # Create issue
 issy close 0001               # Close issue
+issy --version                # Check version
 ```
 
 Run `issy help` for full options.
