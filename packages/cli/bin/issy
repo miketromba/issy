@@ -10,6 +10,11 @@ import {
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import updateNotifier from 'update-notifier'
+import {
+	detectPackageManager,
+	isGlobalInstall,
+	getUpdateCommand
+} from '../dist/update-checker.js'
 
 const args = process.argv.slice(2)
 
@@ -17,7 +22,21 @@ const args = process.argv.slice(2)
 const here = resolve(fileURLToPath(import.meta.url), '..')
 const pkgPath = resolve(here, '..', 'package.json')
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'))
-updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 }).notify() // 1 hour
+
+const notifier = updateNotifier({ pkg, updateCheckInterval: 1000 * 60 }) // 1 minute
+
+if (notifier.update) {
+	const scriptPath = resolve(fileURLToPath(import.meta.url))
+	const pm = detectPackageManager(scriptPath)
+	const isGlobal = isGlobalInstall(scriptPath)
+	const updateCmd = getUpdateCommand(pm, isGlobal)
+	
+	notifier.notify({
+		message: `Update available: ${notifier.update.current} → ${notifier.update.latest}\nRun: ${updateCmd}`,
+		defer: true,
+		boxenOptions: { padding: 1, margin: 1, borderStyle: 'round', borderColor: 'yellow' }
+	})
+}
 
 const cliCommands = new Set([
 	'list',
