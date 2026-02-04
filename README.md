@@ -51,10 +51,12 @@ You can also manage issues directly when needed.
 ### Web UI
 
 ```bash
-npx issy
+npx issy@latest
 ```
 
 Opens a local UI at `http://localhost:1554` for browsing and editing issues.
+
+> **Note:** Always use `npx issy@latest` to ensure you're running the latest version. Plain `npx issy` may use a cached older version.
 
 <p align="center">
   <img src="assets/web-ui-screenshot.png" alt="issy web UI" width="800" />

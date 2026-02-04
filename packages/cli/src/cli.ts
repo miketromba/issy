@@ -266,6 +266,9 @@ issy CLI
 Usage:
   issy <command> [options]
 
+Options:
+  --version, -v           Show version number
+
 Commands:
   list                    List all open issues
     --all, -a             Include closed issues
