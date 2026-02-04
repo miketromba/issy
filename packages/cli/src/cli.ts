@@ -4,11 +4,11 @@
  * issy CLI
  *
  * Usage:
- *   issy list [--all] [--priority <p>] [--type <t>] [--search <q>]
+ *   issy list [--all] [--priority <p>] [--scope <s>] [--type <t>] [--search <q>]
  *   issy read <id>
  *   issy search <query>
- *   issy create [--title <t>] [--description <d>] [--priority <p>] [--type <t>] [--labels <l>]
- *   issy update <id> [--title <t>] [--description <d>] [--priority <p>] [--type <t>] [--labels <l>] [--status <s>]
+ *   issy create [--title <t>] [--description <d>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>]
+ *   issy update <id> [--title <t>] [--description <d>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--status <s>]
  *   issy close <id>
  */
 
@@ -54,6 +54,7 @@ function typeSymbol(type: string): string {
 async function listIssues(options: {
   all?: boolean
   priority?: string
+  scope?: string
   type?: string
   search?: string
 }) {
@@ -63,6 +64,7 @@ async function listIssues(options: {
   const issues = filterAndSearchIssues(allIssues, {
     status: options.all ? undefined : 'open',
     priority: options.priority,
+    scope: options.scope,
     type: options.type,
     search: options.search,
   })
@@ -109,6 +111,9 @@ async function readIssue(id: string) {
       issue.frontmatter.priority
     }`,
   )
+  if (issue.frontmatter.scope) {
+    console.log(`  Scope:       ${issue.frontmatter.scope}`)
+  }
   console.log(`  Type:        ${issue.frontmatter.type}`)
   if (issue.frontmatter.labels) {
     console.log(`  Labels:      ${issue.frontmatter.labels}`)
@@ -157,6 +162,7 @@ async function createIssueCommand(options: {
   title?: string
   description?: string
   priority?: string
+  scope?: string
   type?: string
   labels?: string
 }) {
@@ -182,6 +188,7 @@ async function createIssueCommand(options: {
     options.title = await prompt('Title: ')
     options.description = await prompt('Description: ')
     options.priority = await prompt('Priority (high/medium/low) [medium]: ')
+    options.scope = await prompt('Scope (small/medium/large) []: ')
     options.type = await prompt('Type (bug/improvement) [improvement]: ')
     options.labels = await prompt('Labels (comma-separated) []: ')
 
@@ -200,6 +207,7 @@ async function createIssueCommand(options: {
       title: options.title,
       description: options.description,
       priority: options.priority as 'high' | 'medium' | 'low',
+      scope: options.scope as 'small' | 'medium' | 'large' | undefined,
       type: options.type as 'bug' | 'improvement',
       labels: options.labels,
     }
@@ -218,6 +226,7 @@ async function updateIssueCommand(
     title?: string
     description?: string
     priority?: string
+    scope?: string
     type?: string
     labels?: string
     status?: string
@@ -228,6 +237,7 @@ async function updateIssueCommand(
       title: options.title,
       description: options.description,
       priority: options.priority as 'high' | 'medium' | 'low' | undefined,
+      scope: options.scope as 'small' | 'medium' | 'large' | undefined,
       type: options.type as 'bug' | 'improvement' | undefined,
       labels: options.labels,
       status: options.status as 'open' | 'closed' | undefined,
@@ -273,6 +283,7 @@ Commands:
   list                    List all open issues
     --all, -a             Include closed issues
     --priority, -p <p>    Filter by priority (high, medium, low)
+    --scope <s>           Filter by scope (small, medium, large)
     --type, -t <t>        Filter by type (bug, improvement)
     --search, -s <q>      Fuzzy search issues
 
@@ -285,6 +296,7 @@ Commands:
     --title, -t <t>       Issue title
     --description, -d <d> Short description
     --priority, -p <p>    Priority (high, medium, low)
+    --scope <s>           Scope (small, medium, large)
     --type <t>            Type (bug, improvement)
     --labels, -l <l>      Comma-separated labels
 
@@ -292,6 +304,7 @@ Commands:
     --title, -t <t>       New title
     --description, -d <d> New description
     --priority, -p <p>    New priority
+    --scope <s>           New scope
     --type <t>            New type
     --labels, -l <l>      New labels
     --status, -s <s>      New status (open, closed)
@@ -301,11 +314,12 @@ Commands:
 Examples:
   issy list
   issy list --priority high --type bug
+  issy list --scope large
   issy search "dashboard"
   issy search "k8s" --all
   issy read 0001
-  issy create --title "Fix login bug" --type bug --priority high
-  issy update 0001 --priority low
+  issy create --title "Fix login bug" --type bug --priority high --scope small
+  issy update 0001 --priority low --scope medium
   issy close 0001
 `)
     return
@@ -318,6 +332,7 @@ Examples:
         options: {
           all: { type: 'boolean', short: 'a' },
           priority: { type: 'string', short: 'p' },
+          scope: { type: 'string' },
           type: { type: 'string', short: 't' },
           search: { type: 'string', short: 's' },
         },
@@ -361,6 +376,7 @@ Examples:
           title: { type: 'string', short: 't' },
           description: { type: 'string', short: 'd' },
           priority: { type: 'string', short: 'p' },
+          scope: { type: 'string' },
           type: { type: 'string' },
           labels: { type: 'string', short: 'l' },
         },
@@ -382,6 +398,7 @@ Examples:
           title: { type: 'string', short: 't' },
           description: { type: 'string', short: 'd' },
           priority: { type: 'string', short: 'p' },
+          scope: { type: 'string' },
           type: { type: 'string' },
           labels: { type: 'string', short: 'l' },
           status: { type: 'string', short: 's' },

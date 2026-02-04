@@ -37,15 +37,32 @@ export function IssueList({ issues, selectedId, onSelect }: IssueListProps) {
               </span>
             </div>
 
-            {issue.frontmatter.description && (
+            {(issue.frontmatter.description || issue.content) && (
               <div className="text-[13px] text-text-muted mb-2.5 line-clamp-1">
-                {issue.frontmatter.description}
+                {issue.frontmatter.description ||
+                  issue.content
+                    .replace(/^#+\s+/gm, '') // Remove heading markers
+                    .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
+                    .replace(/\*([^*]+)\*/g, '$1') // Remove italic
+                    .replace(/`([^`]+)`/g, '$1') // Remove inline code
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
+                    .replace(/!\[[^\]]*\]\([^)]+\)/g, '') // Remove images
+                    .replace(/^[-*+]\s+/gm, '') // Remove list markers
+                    .replace(/^\d+\.\s+/gm, '') // Remove numbered list markers
+                    .replace(/^>\s+/gm, '') // Remove blockquote markers
+                    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+                    .replace(/\n+/g, ' ') // Collapse newlines to spaces
+                    .trim()}
               </div>
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
               {issue.frontmatter.priority && (
                 <Badge variant="priority" value={issue.frontmatter.priority} />
+              )}
+
+              {issue.frontmatter.scope && (
+                <Badge variant="scope" value={issue.frontmatter.scope} />
               )}
 
               {issue.frontmatter.status && (

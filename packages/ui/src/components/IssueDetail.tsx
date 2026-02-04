@@ -148,6 +148,10 @@ export function IssueDetail({
             <Badge variant="priority" value={issue.frontmatter.priority} />
           )}
 
+          {issue.frontmatter.scope && (
+            <Badge variant="scope" value={issue.frontmatter.scope} />
+          )}
+
           {issue.frontmatter.status && (
             <Badge variant="status" value={issue.frontmatter.status} />
           )}

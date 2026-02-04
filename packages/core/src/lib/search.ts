@@ -50,6 +50,9 @@ export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
     if (filters.priority && issue.frontmatter.priority !== filters.priority) {
       return false
     }
+    if (filters.scope && issue.frontmatter.scope !== filters.scope) {
+      return false
+    }
     if (filters.type && issue.frontmatter.type !== filters.type) {
       return false
     }
@@ -121,7 +124,7 @@ export function filterAndSearchIssues(
  * Sort issues by the specified sort option
  *
  * @param issues - Array of issues to sort (modified in place)
- * @param sortBy - Sort option: "priority", "created", "updated", or "id"
+ * @param sortBy - Sort option: "priority", "scope", "created", "updated", or "id"
  */
 function sortIssues(issues: Issue[], sortBy: string): void {
   const sortOption = sortBy.toLowerCase()
@@ -138,6 +141,24 @@ function sortIssues(issues: Issue[], sortBy: string): void {
       const priorityB = priorityOrder[b.frontmatter.priority] ?? 999
       if (priorityA !== priorityB) return priorityA - priorityB
       return b.id.localeCompare(a.id) // newest first within priority
+    })
+  } else if (sortOption === 'scope') {
+    // Sort by scope (small → medium → large), then by ID (newest first)
+    // Issues without scope go to the end
+    const scopeOrder: Record<string, number> = {
+      small: 0,
+      medium: 1,
+      large: 2,
+    }
+    issues.sort((a, b) => {
+      const scopeA = a.frontmatter.scope
+        ? (scopeOrder[a.frontmatter.scope] ?? 99)
+        : 99
+      const scopeB = b.frontmatter.scope
+        ? (scopeOrder[b.frontmatter.scope] ?? 99)
+        : 99
+      if (scopeA !== scopeB) return scopeA - scopeB
+      return b.id.localeCompare(a.id) // newest first within scope
     })
   } else if (sortOption === 'created') {
     // Sort by creation date (newest first)
@@ -256,6 +277,22 @@ export function filterByQuery(issues: Issue[], query: string): Issue[] {
         priorityValue === 'low'
       ) {
         if (issue.frontmatter.priority !== priorityValue) {
+          return false
+        }
+      }
+      // Invalid values are ignored (issue passes filter)
+    }
+
+    // scope: qualifier
+    if (parsed.qualifiers.scope) {
+      const scopeValue = parsed.qualifiers.scope.toLowerCase()
+      // Only filter if value is valid (small, medium, or large)
+      if (
+        scopeValue === 'small' ||
+        scopeValue === 'medium' ||
+        scopeValue === 'large'
+      ) {
+        if (issue.frontmatter.scope !== scopeValue) {
           return false
         }
       }

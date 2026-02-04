@@ -147,6 +147,7 @@ my-monorepo/
 title: Fix login redirect
 description: Users get stuck after OAuth callback
 priority: high
+scope: medium
 type: bug
 status: open
 created: 2025-01-15T10:30:00
@@ -161,6 +162,7 @@ session isn't established, causing a redirect loop.
 | Field | Values |
 |-------|--------|
 | `priority` | `high`, `medium`, `low` |
+| `scope` | `small`, `medium`, `large` (optional) |
 | `type` | `bug`, `improvement` |
 | `status` | `open`, `closed` |
 | `labels` | comma-separated (optional) |

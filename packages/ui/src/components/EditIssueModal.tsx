@@ -19,6 +19,7 @@ export function EditIssueModal({
   const [description, setDescription] = useState('')
   const [type, setType] = useState<'bug' | 'improvement'>('improvement')
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium')
+  const [scope, setScope] = useState<'small' | 'medium' | 'large' | ''>('')
   const [labels, setLabels] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,6 +35,7 @@ export function EditIssueModal({
       setPriority(
         (issue.frontmatter.priority as 'high' | 'medium' | 'low') || 'medium',
       )
+      setScope((issue.frontmatter.scope as 'small' | 'medium' | 'large') || '')
       setLabels(issue.frontmatter.labels || '')
     }
   }, [issue])
@@ -60,6 +62,7 @@ export function EditIssueModal({
           description: description.trim() || title.trim(),
           type,
           priority,
+          scope: scope || undefined,
           labels: labels.trim() || undefined,
         }),
       })
@@ -177,6 +180,24 @@ export function EditIssueModal({
                 <option value="low">Low</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-text-secondary mb-1.5">
+              Scope
+            </label>
+            <select
+              value={scope}
+              onChange={(e) =>
+                setScope(e.target.value as 'small' | 'medium' | 'large' | '')
+              }
+              className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent"
+            >
+              <option value="">Not set</option>
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
           </div>
 
           <div>

@@ -35,7 +35,7 @@ function Dropdown({ label, value, options, onSelect }: DropdownProps) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors ${
+        className={`inline-flex items-center gap-1 px-2 py-1 pr-1 text-xs rounded border transition-colors ${
           value
             ? 'bg-accent/10 border-accent/30 text-accent'
             : 'bg-transparent border-border text-text-muted hover:text-text-secondary hover:border-border'
@@ -67,7 +67,7 @@ function Dropdown({ label, value, options, onSelect }: DropdownProps) {
               >
                 Clear
               </button>
-              <div className="border-t border-border my-1" />
+              <div className="my-1 border-t border-border" />
             </>
           )}
           {options.map((option) => (
@@ -97,10 +97,14 @@ const SORT_OPTIONS = [
   { value: 'created', label: 'Newest' },
   { value: 'created-asc', label: 'Oldest' },
   { value: 'priority', label: 'Priority' },
+  { value: 'scope', label: 'Scope' },
 ]
 
 // Priority sort order for consistent display
 const PRIORITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 }
+
+// Scope sort order for consistent display
+const SCOPE_ORDER: Record<string, number> = { small: 0, medium: 1, large: 2 }
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -125,6 +129,10 @@ function extractUniqueValues(
       if (key === 'priority') {
         return (PRIORITY_ORDER[a] ?? 99) - (PRIORITY_ORDER[b] ?? 99)
       }
+      // Special sort for scope
+      if (key === 'scope') {
+        return (SCOPE_ORDER[a] ?? 99) - (SCOPE_ORDER[b] ?? 99)
+      }
       return a.localeCompare(b)
     })
     .map((v) => ({ value: v, label: capitalize(v) }))
@@ -140,6 +148,10 @@ export function FilterBar({ query, onQueryChange, issues }: FilterBarProps) {
   )
   const priorityOptions = useMemo(
     () => extractUniqueValues(issues, 'priority'),
+    [issues],
+  )
+  const scopeOptions = useMemo(
+    () => extractUniqueValues(issues, 'scope'),
     [issues],
   )
   const typeOptions = useMemo(
@@ -162,6 +174,7 @@ export function FilterBar({ query, onQueryChange, issues }: FilterBarProps) {
     // Add qualifiers in consistent order
     if (newQualifiers.is) parts.push(`is:${newQualifiers.is}`)
     if (newQualifiers.priority) parts.push(`priority:${newQualifiers.priority}`)
+    if (newQualifiers.scope) parts.push(`scope:${newQualifiers.scope}`)
     if (newQualifiers.type) parts.push(`type:${newQualifiers.type}`)
     if (newQualifiers.label) parts.push(`label:${newQualifiers.label}`)
     if (newQualifiers.sort) parts.push(`sort:${newQualifiers.sort}`)
@@ -173,7 +186,7 @@ export function FilterBar({ query, onQueryChange, issues }: FilterBarProps) {
   }
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-wrap gap-2 items-center">
       {statusOptions.length > 0 && (
         <Dropdown
           label="Status"
@@ -188,6 +201,14 @@ export function FilterBar({ query, onQueryChange, issues }: FilterBarProps) {
           value={parsed.qualifiers.priority || null}
           options={priorityOptions}
           onSelect={(v) => updateQualifier('priority', v)}
+        />
+      )}
+      {scopeOptions.length > 0 && (
+        <Dropdown
+          label="Scope"
+          value={parsed.qualifiers.scope || null}
+          options={scopeOptions}
+          onSelect={(v) => updateQualifier('scope', v)}
         />
       )}
       {typeOptions.length > 0 && (

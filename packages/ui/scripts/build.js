@@ -50,15 +50,14 @@ for (const output of frontendBuild.outputs) {
 
 console.log('Building CSS...')
 
-// Build Tailwind CSS using Bun's native shell (avoids bundler interference)
+// Build Tailwind CSS v4 using the CLI
 const uiDir = join(__dirname, '..')
 try {
-	await Bun.$`cd ${uiDir} && npx tailwindcss -i ${join(srcDir, 'index.css')} -o ${join(distDir, 'styles.css')} --minify`.quiet()
+	await Bun.$`cd ${uiDir} && bunx @tailwindcss/cli -i ${join(srcDir, 'index.css')} -o ${join(distDir, 'styles.css')} --minify`.quiet()
 	console.log('Tailwind CSS built successfully')
 } catch (e) {
-	// Fallback: copy the CSS file as-is if tailwind CLI fails
-	console.log('Tailwind CLI failed, using raw CSS')
-	cpSync(join(srcDir, 'index.css'), join(distDir, 'styles.css'))
+	console.error('Tailwind CSS build failed:', e)
+	throw e
 }
 
 // Create the HTML file

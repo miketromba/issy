@@ -74,6 +74,7 @@ Use the `issy` CLI. If not installed, install it globally using the project's pa
 issy list                    # Open issues only
 issy list --all              # Include closed
 issy list --priority high    # Filter: high, medium, low
+issy list --scope small      # Filter: small, medium, large
 issy list --type bug         # Filter: bug, improvement
 issy list --search "keyword" # Fuzzy search
 
@@ -85,11 +86,12 @@ issy search "k8s" --all      # Include closed issues
 issy read <id>               # e.g., issy read 0001
 
 # Create issue
-issy create --title "Fix login bug" --type bug --priority high
-issy create --title "Add dark mode" --type improvement --priority medium --labels "ui, frontend"
+issy create --title "Fix login bug" --type bug --priority high --scope small
+issy create --title "Add dark mode" --type improvement --priority medium --scope medium --labels "ui, frontend"
 
 # Update issue
 issy update <id> --priority low
+issy update <id> --scope large
 issy update <id> --status closed
 issy update <id> --labels "api, backend"
 
@@ -115,6 +117,7 @@ Keep it brief—just capture what someone revisiting this issue would want to kn
 | title | Yes | string |
 | description | Yes | string (one-line summary) |
 | priority | Yes | `high`, `medium`, `low` |
+| scope | No | `small`, `medium`, `large` |
 | type | Yes | `bug`, `improvement` |
 | labels | No | comma-separated strings |
 | status | Yes | `open`, `closed` |

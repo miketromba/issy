@@ -18,6 +18,7 @@ await createIssue({
   title: "Add dark mode",
   description: "Theme toggle",
   priority: "medium",
+  scope: "medium",
   type: "improvement",
 });
 

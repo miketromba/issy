@@ -49,9 +49,14 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
                 values="high, medium, low"
               />
               <QualifierRow
+                qualifier="scope:"
+                description="Filter by scope"
+                values="small, medium, large"
+              />
+              <QualifierRow
                 qualifier="type:"
                 description="Filter by issue type"
-                values="bug, feature, task, etc."
+                values="bug, improvement"
               />
               <QualifierRow
                 qualifier="label:"
@@ -61,7 +66,7 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
               <QualifierRow
                 qualifier="sort:"
                 description="Sort results"
-                values="created, priority, title"
+                values="created, priority, scope"
               />
             </div>
           </section>
@@ -74,6 +79,10 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
               <ExampleRow
                 code="is:open priority:high"
                 description="High priority open issues"
+              />
+              <ExampleRow
+                code="scope:small priority:high"
+                description="Quick wins (small scope, high priority)"
               />
               <ExampleRow
                 code="type:bug dashboard"

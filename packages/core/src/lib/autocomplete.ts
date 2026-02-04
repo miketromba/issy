@@ -20,7 +20,14 @@ export interface Suggestion {
 /**
  * Supported qualifier keys
  */
-const QUALIFIER_KEYS = ['is', 'priority', 'type', 'label', 'sort'] as const
+const QUALIFIER_KEYS = [
+  'is',
+  'priority',
+  'scope',
+  'type',
+  'label',
+  'sort',
+] as const
 
 /**
  * Valid values for each qualifier
@@ -28,8 +35,9 @@ const QUALIFIER_KEYS = ['is', 'priority', 'type', 'label', 'sort'] as const
 const QUALIFIER_VALUES: Record<string, readonly string[]> = {
   is: ['open', 'closed'] as const,
   priority: ['high', 'medium', 'low'] as const,
+  scope: ['small', 'medium', 'large'] as const,
   type: ['bug', 'improvement'] as const,
-  sort: ['priority', 'created', 'updated', 'id'] as const,
+  sort: ['priority', 'scope', 'created', 'updated', 'id'] as const,
   // label values are dynamic and provided via existingLabels parameter
 }
 
@@ -203,6 +211,7 @@ function getQualifierDescription(key: string): string {
   const descriptions: Record<string, string> = {
     is: 'Filter by status',
     priority: 'Filter by priority',
+    scope: 'Filter by scope',
     type: 'Filter by type',
     label: 'Filter by label',
     sort: 'Sort results',
@@ -219,6 +228,9 @@ function getValueDescription(key: string, value: string): string {
   }
   if (key === 'priority') {
     return `Priority: ${value}`
+  }
+  if (key === 'scope') {
+    return `Scope: ${value}`
   }
   if (key === 'type') {
     return value === 'bug' ? 'Bug report' : 'Improvement'

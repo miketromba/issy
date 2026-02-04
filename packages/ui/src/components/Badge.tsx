@@ -1,5 +1,5 @@
 interface BadgeProps {
-  variant: 'status' | 'priority' | 'type' | 'label'
+  variant: 'status' | 'priority' | 'scope' | 'type' | 'label'
   value: string
   className?: string
 }
@@ -13,6 +13,12 @@ const priorityStyles: Record<string, string> = {
   high: 'bg-priority-high/15 text-red-400',
   medium: 'bg-priority-medium/15 text-amber-400',
   low: 'bg-priority-low/15 text-green-400',
+}
+
+const scopeStyles: Record<string, string> = {
+  small: 'bg-scope-small/15 text-cyan-400',
+  medium: 'bg-scope-medium/15 text-blue-400',
+  large: 'bg-scope-large/15 text-violet-400',
 }
 
 const typeStyles: Record<string, string> = {
@@ -32,6 +38,9 @@ export function Badge({ variant, value, className = '' }: BadgeProps) {
       break
     case 'priority':
       style = priorityStyles[normalizedValue] || ''
+      break
+    case 'scope':
+      style = scopeStyles[normalizedValue] || ''
       break
     case 'type':
       style = typeStyles[normalizedValue] || 'bg-purple-500/15 text-purple-400'

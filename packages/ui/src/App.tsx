@@ -8,6 +8,8 @@ import { FilterBar } from './components/FilterBar'
 import { IssueDetail } from './components/IssueDetail'
 import { IssueList } from './components/IssueList'
 import { QueryHelpModal } from './components/QueryHelpModal'
+import { SearchInput } from './components/SearchInput'
+import { SettingsModal } from './components/SettingsModal'
 
 // Re-export types for components
 export type { Issue, IssueFrontmatter }
@@ -16,7 +18,32 @@ interface FilterState {
   query: string
 }
 
+interface Settings {
+  autocompleteEnabled: boolean
+}
+
 const STORAGE_KEY = 'issy-state'
+const SETTINGS_KEY = 'issy-settings'
+
+function loadSettings(): Settings {
+  try {
+    const stored = localStorage.getItem(SETTINGS_KEY)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (e) {
+    console.error('Failed to load settings from localStorage:', e)
+  }
+  return { autocompleteEnabled: true }
+}
+
+function saveSettings(settings: Settings) {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+  } catch (e) {
+    console.error('Failed to save settings to localStorage:', e)
+  }
+}
 
 function loadState(): { filters: FilterState; selectedIssueId: string | null } {
   try {
@@ -70,6 +97,8 @@ export function App() {
     initialState.selectedIssueId,
   )
   const [showHelp, setShowHelp] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [settings, setSettings] = useState<Settings>(loadSettings)
   const [showCreate, setShowCreate] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
@@ -123,6 +152,15 @@ export function App() {
   useEffect(() => {
     saveState(filters, selectedIssueId)
   }, [filters, selectedIssueId])
+
+  const handleAutocompleteChange = useCallback(
+    (enabled: boolean) => {
+      const newSettings = { ...settings, autocompleteEnabled: enabled }
+      setSettings(newSettings)
+      saveSettings(newSettings)
+    },
+    [settings],
+  )
 
   const handleSelectIssue = useCallback((id: string | null) => {
     setSelectedIssueId(id)
@@ -190,7 +228,7 @@ export function App() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background text-text-muted">
+      <div className="flex justify-center items-center h-screen bg-background text-text-muted">
         Loading issues...
       </div>
     )
@@ -198,22 +236,22 @@ export function App() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background text-red-400">
+      <div className="flex justify-center items-center h-screen text-red-400 bg-background">
         Error: {error}
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen bg-background text-text-primary font-sans text-sm leading-relaxed">
+    <div className="flex h-screen font-sans text-sm leading-relaxed bg-background text-text-primary">
       {/* Sidebar - hidden on mobile when issue is selected */}
       <aside
-        className={`w-full md:w-[380px] md:min-w-[380px] border-r border-border flex flex-col h-screen bg-background ${
+        className={`w-full md:w-[382px] md:min-w-[382px] border-r border-border flex flex-col h-screen bg-background ${
           selectedIssue ? 'hidden md:flex' : 'flex'
         }`}
       >
-        <div className="p-4 md:p-5 border-b border-border">
-          <div className="flex items-center justify-between mb-4">
+        <div className="p-4 border-b md:p-5 border-border">
+          <div className="flex justify-between items-center mb-4">
             <h1 className="text-lg font-semibold text-text-primary">issy</h1>
             <button
               onClick={() => setShowCreate(true)}
@@ -233,23 +271,13 @@ export function App() {
             </button>
           </div>
 
-          <div className="flex items-center bg-surface border border-border rounded-lg focus-within:border-accent transition-colors">
-            <input
-              type="text"
-              placeholder="Filter: is:open priority:high..."
-              value={filters.query}
-              onChange={(e) => setFilters({ query: e.target.value })}
-              className="flex-1 px-3.5 py-2.5 bg-transparent text-text-primary text-sm placeholder:text-text-muted focus:outline-none"
-            />
-            <button
-              onClick={() => setShowHelp(true)}
-              aria-label="Query syntax help"
-              title="Query syntax help"
-              className="w-10 h-[38px] shrink-0 flex items-center justify-center border-l border-border rounded-r-lg text-text-muted text-sm font-medium cursor-pointer transition-colors hover:bg-surface-elevated hover:text-text-primary"
-            >
-              ?
-            </button>
-          </div>
+          <SearchInput
+            value={filters.query}
+            onChange={(query) => setFilters({ query })}
+            onHelpClick={() => setShowHelp(true)}
+            issues={issues}
+            autocompleteEnabled={settings.autocompleteEnabled}
+          />
 
           <div className="mt-3">
             <FilterBar
@@ -260,7 +288,7 @@ export function App() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="overflow-y-auto flex-1 custom-scrollbar">
           <IssueList
             issues={filteredIssues}
             selectedId={selectedIssueId}
@@ -268,8 +296,30 @@ export function App() {
           />
         </div>
 
-        <div className="px-4 md:px-5 py-3 border-t border-border text-xs text-text-muted">
-          {filteredIssues.length} of {issues.length} issues
+        <div className="flex justify-between items-center px-4 py-3 text-xs border-t md:px-5 border-border text-text-muted">
+          <span>
+            {filteredIssues.length} of {issues.length} issues
+          </span>
+          <button
+            onClick={() => setShowSettings(true)}
+            aria-label="Settings"
+            title="Settings"
+            className="p-1 rounded transition-colors text-text-muted hover:text-text-primary hover:bg-surface-elevated"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
         </div>
       </aside>
 
@@ -297,6 +347,13 @@ export function App() {
 
       {/* Modals */}
       <QueryHelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        autocompleteEnabled={settings.autocompleteEnabled}
+        onAutocompleteChange={handleAutocompleteChange}
+      />
 
       <CreateIssueModal
         isOpen={showCreate}

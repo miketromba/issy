@@ -19,6 +19,7 @@ export interface ParsedQuery {
 const SUPPORTED_QUALIFIERS = new Set([
   'is',
   'priority',
+  'scope',
   'type',
   'label',
   'sort',

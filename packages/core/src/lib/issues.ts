@@ -163,6 +163,9 @@ export function generateFrontmatter(data: IssueFrontmatter): string {
   lines.push(`title: ${data.title}`)
   lines.push(`description: ${data.description}`)
   lines.push(`priority: ${data.priority}`)
+  if (data.scope) {
+    lines.push(`scope: ${data.scope}`)
+  }
   lines.push(`type: ${data.type}`)
   if (data.labels) {
     lines.push(`labels: ${data.labels}`)
@@ -300,10 +303,15 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
   }
 
   const priority = input.priority || 'medium'
+  const scope = input.scope
   const type = input.type || 'improvement'
 
   if (!['high', 'medium', 'low'].includes(priority)) {
     throw new Error('Priority must be: high, medium, or low')
+  }
+
+  if (scope && !['small', 'medium', 'large'].includes(scope)) {
+    throw new Error('Scope must be: small, medium, or large')
   }
 
   if (!['bug', 'improvement'].includes(type)) {
@@ -318,6 +326,7 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
     title: input.title,
     description: input.description || input.title,
     priority,
+    scope: scope || undefined,
     type,
     labels: input.labels || undefined,
     status: 'open',
@@ -361,6 +370,7 @@ export async function updateIssue(
     ...(input.title && { title: input.title }),
     ...(input.description && { description: input.description }),
     ...(input.priority && { priority: input.priority }),
+    ...(input.scope && { scope: input.scope }),
     ...(input.type && { type: input.type }),
     ...(input.labels !== undefined && {
       labels: input.labels || undefined,
