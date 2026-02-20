@@ -1,6 +1,6 @@
 ## Shipping
 
-When the user says "ship", that means: **push to remote AND publish to npm**. Do both.
+When the user says "ship", that means: **push to remote, and, if there are user-facing changes to release, publish to npm**.
 
 1. Bump `version` in all three package.json files. Follow semver when bumping versions:
 - **Patch** (0.0.x): Bug fixes, minor tweaks, no API changes
