@@ -7,7 +7,6 @@ describe('Frontmatter', () => {
 		const content = [
 			'---',
 			'title: Test',
-			'description: A test',
 			'priority: high',
 			'type: bug',
 			'status: open',
@@ -26,7 +25,6 @@ describe('Frontmatter', () => {
 		const content = [
 			'---',
 			'title: Test',
-			'description: A test',
 			'priority: high',
 			'type: bug',
 			'status: open',
@@ -43,7 +41,6 @@ describe('Frontmatter', () => {
 	test('generateFrontmatter includes order when present', () => {
 		const data: IssueFrontmatter = {
 			title: 'Test',
-			description: 'A test',
 			priority: 'high',
 			type: 'bug',
 			status: 'open',
@@ -58,7 +55,6 @@ describe('Frontmatter', () => {
 	test('generateFrontmatter omits order when undefined', () => {
 		const data: IssueFrontmatter = {
 			title: 'Test',
-			description: 'A test',
 			priority: 'high',
 			type: 'bug',
 			status: 'open',
@@ -72,7 +68,6 @@ describe('Frontmatter', () => {
 	test('roundtrip: generate then parse preserves order', () => {
 		const data: IssueFrontmatter = {
 			title: 'Test',
-			description: 'A test',
 			priority: 'medium',
 			type: 'improvement',
 			status: 'open',

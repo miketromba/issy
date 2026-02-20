@@ -195,7 +195,6 @@ This moves your issues to `.issy/issues/` and assigns roadmap order to all open 
 ```markdown
 ---
 title: Fix login redirect
-description: Users get stuck after OAuth callback
 priority: high
 scope: medium
 type: bug

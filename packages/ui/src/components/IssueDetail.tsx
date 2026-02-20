@@ -61,12 +61,6 @@ export function IssueDetail({ issue, onBack }: IssueDetailProps) {
 					</h1>
 				</div>
 
-				{issue.frontmatter.description && (
-					<p className="text-[15px] text-text-secondary leading-relaxed mb-4">
-						{issue.frontmatter.description}
-					</p>
-				)}
-
 				<div className="flex flex-wrap items-center gap-2 text-sm">
 					{issue.frontmatter.priority && (
 						<Badge

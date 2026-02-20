@@ -163,7 +163,6 @@ Keep it brief—just capture what someone revisiting this issue would want to kn
 | Property | Required | Values |
 |----------|----------|--------|
 | title | Yes | string |
-| description | Yes | string (one-line summary) |
 | body | No | markdown content (the issue body after frontmatter) |
 | priority | Yes | `high`, `medium`, `low` |
 | scope | No | `small`, `medium`, `large` |

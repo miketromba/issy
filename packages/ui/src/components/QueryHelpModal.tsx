@@ -109,8 +109,7 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
 								Combine multiple qualifiers to narrow results
 							</li>
 							<li className="text-text-secondary text-[13px] pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-text-muted">
-								Free text searches titles, descriptions, and
-								content
+								Free text searches titles, labels, and content
 							</li>
 							<li className="text-text-secondary text-[13px] pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-text-muted">
 								Use quotes for multi-word searches:{' '}

@@ -4,7 +4,6 @@
 
 export interface IssueFrontmatter {
 	title: string
-	description: string
 	priority: 'high' | 'medium' | 'low'
 	scope?: 'small' | 'medium' | 'large'
 	type: 'bug' | 'improvement'
@@ -32,7 +31,6 @@ export interface IssueFilters {
 
 export interface CreateIssueInput {
 	title: string
-	description?: string
 	body?: string
 	priority?: 'high' | 'medium' | 'low'
 	scope?: 'small' | 'medium' | 'large'
@@ -43,7 +41,6 @@ export interface CreateIssueInput {
 
 export interface UpdateIssueInput {
 	title?: string
-	description?: string
 	body?: string
 	priority?: 'high' | 'medium' | 'low'
 	scope?: 'small' | 'medium' | 'large'

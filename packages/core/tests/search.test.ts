@@ -14,15 +14,15 @@ describe('Search', () => {
 	beforeEach(async () => {
 		await createIssue({
 			title: 'Dashboard performance issue',
-			description: 'The dashboard loads slowly'
+			body: '## Details\n\nThe dashboard loads slowly'
 		})
 		await createIssue({
 			title: 'Login bug',
-			description: 'Users cannot login with SSO'
+			body: '## Details\n\nUsers cannot login with SSO'
 		})
 		await createIssue({
 			title: 'API endpoint missing',
-			description: 'Need to add dashboard metrics endpoint'
+			body: '## Details\n\nNeed to add dashboard metrics endpoint'
 		})
 	})
 
@@ -36,11 +36,10 @@ describe('Search', () => {
 		).toBe(true)
 	})
 
-	test('filterByQuery searches description', async () => {
+	test('filterByQuery searches body content', async () => {
 		const all = await getAllIssues()
 		const result = filterByQuery(all, 'cannot login')
 
-		// Should find the issue with "cannot login" in description
 		expect(result.length).toBeGreaterThan(0)
 		expect(result[0].frontmatter.title).toBe('Login bug')
 	})

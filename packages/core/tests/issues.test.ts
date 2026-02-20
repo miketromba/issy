@@ -28,7 +28,6 @@ describe('Issue CRUD', () => {
 	test('createIssue with all fields including scope', async () => {
 		const issue = await createIssue({
 			title: 'Full issue',
-			description: 'A complete issue',
 			priority: 'high',
 			scope: 'large',
 			type: 'bug',
@@ -36,7 +35,6 @@ describe('Issue CRUD', () => {
 		})
 
 		expect(issue.frontmatter.title).toBe('Full issue')
-		expect(issue.frontmatter.description).toBe('A complete issue')
 		expect(issue.frontmatter.priority).toBe('high')
 		expect(issue.frontmatter.scope).toBe('large')
 		expect(issue.frontmatter.type).toBe('bug')

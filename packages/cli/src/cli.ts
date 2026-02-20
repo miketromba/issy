@@ -5,8 +5,8 @@
  *   issy list [--all] [--priority <p>] [--scope <s>] [--type <t>] [--search <q>] [--sort <s>]
  *   issy read <id>
  *   issy search <query>
- *   issy create [--title <t>] [--description <d>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
- *   issy update <id> [--title <t>] [--description <d>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
+ *   issy create [--title <t>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
+ *   issy update <id> [--title <t>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
  *   issy close <id>
  *   issy reopen <id> [--before <id> | --after <id>]
  *   issy next
@@ -209,7 +209,6 @@ async function searchIssuesCommand(query: string, options: { all?: boolean }) {
 
 async function createIssueCommand(options: {
 	title?: string
-	description?: string
 	body?: string
 	priority?: string
 	scope?: string
@@ -239,7 +238,6 @@ async function createIssueCommand(options: {
 		}
 
 		options.title = await prompt('Title: ')
-		options.description = await prompt('Description: ')
 		options.priority = await prompt('Priority (high/medium/low) [medium]: ')
 		options.scope = await prompt('Scope (small/medium/large) []: ')
 		options.type = await prompt('Type (bug/improvement) [improvement]: ')
@@ -265,7 +263,6 @@ async function createIssueCommand(options: {
 
 		const input: CreateIssueInput = {
 			title: options.title,
-			description: options.description,
 			body: options.body,
 			priority: options.priority as 'high' | 'medium' | 'low',
 			scope: options.scope as 'small' | 'medium' | 'large' | undefined,
@@ -286,7 +283,6 @@ async function updateIssueCommand(
 	id: string,
 	options: {
 		title?: string
-		description?: string
 		body?: string
 		priority?: string
 		scope?: string
@@ -313,7 +309,6 @@ async function updateIssueCommand(
 
 		const issue = await updateIssue(id, {
 			title: options.title,
-			description: options.description,
 			body: options.body,
 			priority: options.priority as 'high' | 'medium' | 'low' | undefined,
 			scope: options.scope as 'small' | 'medium' | 'large' | undefined,
@@ -383,9 +378,6 @@ async function nextIssueCommand() {
 	console.log(
 		`  #${issue.id}  ${prioritySymbol(issue.frontmatter.priority)} ${typeSymbol(issue.frontmatter.type)}  ${issue.frontmatter.title}`
 	)
-	if (issue.frontmatter.description !== issue.frontmatter.title) {
-		console.log(`  ${issue.frontmatter.description}`)
-	}
 	console.log()
 }
 
@@ -427,7 +419,6 @@ Commands:
 
   create                  Create a new issue
     --title, -t <t>       Issue title
-    --description, -d <d> Short description
     --body, -b <b>        Markdown body content
     --priority, -p <p>    Priority (high, medium, low)
     --scope <s>           Scope (small, medium, large)
@@ -440,7 +431,6 @@ Commands:
 
   update <id>             Update an issue
     --title, -t <t>       New title
-    --description, -d <d> New description
     --body, -b <b>        New markdown body content
     --priority, -p <p>    New priority
     --scope <s>           New scope
@@ -531,7 +521,6 @@ Examples:
 				args: args.slice(1),
 				options: {
 					title: { type: 'string', short: 't' },
-					description: { type: 'string', short: 'd' },
 					body: { type: 'string', short: 'b' },
 					priority: { type: 'string', short: 'p' },
 					scope: { type: 'string' },
@@ -558,7 +547,6 @@ Examples:
 				args: args.slice(2),
 				options: {
 					title: { type: 'string', short: 't' },
-					description: { type: 'string', short: 'd' },
 					body: { type: 'string', short: 'b' },
 					priority: { type: 'string', short: 'p' },
 					scope: { type: 'string' },

@@ -200,7 +200,6 @@ export function parseFrontmatter(content: string): {
 export function generateFrontmatter(data: IssueFrontmatter): string {
 	const lines = ['---']
 	lines.push(`title: ${data.title}`)
-	lines.push(`description: ${data.description}`)
 	lines.push(`priority: ${data.priority}`)
 	if (data.scope) {
 		lines.push(`scope: ${data.scope}`)
@@ -429,7 +428,6 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
 
 	const frontmatter: IssueFrontmatter = {
 		title: input.title,
-		description: input.description || input.title,
 		priority,
 		scope: scope || undefined,
 		type,
@@ -466,7 +464,6 @@ export async function updateIssue(
 	const updatedFrontmatter: IssueFrontmatter = {
 		...issue.frontmatter,
 		...(input.title && { title: input.title }),
-		...(input.description && { description: input.description }),
 		...(input.priority && { priority: input.priority }),
 		...(input.scope && { scope: input.scope }),
 		...(input.type && { type: input.type }),

@@ -10,7 +10,6 @@ import type { Issue, IssueFilters } from './types'
 const FUSE_OPTIONS: IFuseOptions<Issue> = {
 	keys: [
 		{ name: 'frontmatter.title', weight: 1.0 },
-		{ name: 'frontmatter.description', weight: 0.7 },
 		{ name: 'frontmatter.labels', weight: 0.5 },
 		{ name: 'content', weight: 0.3 }
 	],
@@ -227,7 +226,7 @@ function sortIssues(issues: Issue[], sortBy: string): void {
  * - `sort:roadmap` / `sort:priority` / `sort:created` / `sort:created-asc` / `sort:updated` / `sort:id` - sorts results
  *
  * Any remaining free text after qualifiers triggers fuzzy search across title,
- * description, labels, and content. Results are sorted by relevance when search
+ * labels, and content. Results are sorted by relevance when search
  * text is present. When no search text is provided, results are sorted by the
  * `sort:` qualifier (defaults to roadmap if not specified). ID prefix matching
  * is supported (e.g., "1" matches #0001).
