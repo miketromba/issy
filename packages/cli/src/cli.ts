@@ -349,11 +349,32 @@ async function nextIssueCommand() {
 		return
 	}
 
-	console.log(`\n  Next issue:`)
-	console.log(`  ${'-'.repeat(60)}`)
+	console.log(`\n${'='.repeat(70)}`)
 	console.log(
-		`  #${issue.id}  ${prioritySymbol(issue.frontmatter.priority)} ${typeSymbol(issue.frontmatter.type)}  ${issue.frontmatter.title}`
+		`  ${typeSymbol(issue.frontmatter.type)} ${issue.frontmatter.title}`
 	)
+	console.log('='.repeat(70))
+	console.log(`  ID:          ${issue.id}`)
+	console.log(`  Status:      ${issue.frontmatter.status.toUpperCase()}`)
+	console.log(
+		`  Priority:    ${prioritySymbol(issue.frontmatter.priority)} ${issue.frontmatter.priority}`
+	)
+	if (issue.frontmatter.scope) {
+		console.log(`  Scope:       ${issue.frontmatter.scope}`)
+	}
+	console.log(`  Type:        ${issue.frontmatter.type}`)
+	if (issue.frontmatter.labels) {
+		console.log(`  Labels:      ${issue.frontmatter.labels}`)
+	}
+	if (issue.frontmatter.order) {
+		console.log(`  Order:       ${issue.frontmatter.order}`)
+	}
+	console.log(`  Created:     ${issue.frontmatter.created}`)
+	if (issue.frontmatter.updated) {
+		console.log(`  Updated:     ${issue.frontmatter.updated}`)
+	}
+	console.log('-'.repeat(70))
+	console.log(issue.content)
 	console.log()
 }
 
