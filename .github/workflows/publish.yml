@@ -36,6 +36,44 @@ jobs:
       - name: Test
         run: bun run test
 
+      - name: Resolve workspace dependencies
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const pkgDirs = fs.readdirSync('packages');
+            const versions = {};
+            for (const dir of pkgDirs) {
+              const p = path.join('packages', dir, 'package.json');
+              if (fs.existsSync(p)) {
+                const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+                versions[pkg.name] = pkg.version;
+              }
+            }
+            for (const dir of pkgDirs) {
+              const p = path.join('packages', dir, 'package.json');
+              if (!fs.existsSync(p)) continue;
+              const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+              let changed = false;
+              for (const depType of ['dependencies', 'devDependencies', 'peerDependencies']) {
+                if (!pkg[depType]) continue;
+                for (const [name, ver] of Object.entries(pkg[depType])) {
+                  if (typeof ver === 'string' && ver.startsWith('workspace:')) {
+                    const prefix = ver.slice('workspace:'.length);
+                    if (versions[name]) {
+                      pkg[depType][name] = prefix + versions[name];
+                      changed = true;
+                    }
+                  }
+                }
+              }
+              if (changed) {
+                fs.writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+                console.log('Resolved workspace deps in ' + p);
+              }
+            }
+          "
+
       - name: Publish @miketromba/issy-core
         run: npm publish --access public --provenance -w @miketromba/issy-core
 
