@@ -124,12 +124,22 @@ export function filterAndSearchIssues(
  * Sort issues by the specified sort option
  *
  * @param issues - Array of issues to sort (modified in place)
- * @param sortBy - Sort option: "priority", "scope", "created", "updated", or "id"
+ * @param sortBy - Sort option: "roadmap", "priority", "scope", "created", "updated", or "id"
  */
 function sortIssues(issues: Issue[], sortBy: string): void {
   const sortOption = sortBy.toLowerCase()
 
-  if (sortOption === 'priority') {
+  if (sortOption === 'roadmap') {
+    issues.sort((a, b) => {
+      const orderA = a.frontmatter.order
+      const orderB = b.frontmatter.order
+      if (orderA && orderB)
+        return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
+      if (orderA && !orderB) return -1
+      if (!orderA && orderB) return 1
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+    })
+  } else if (sortOption === 'priority') {
     // Sort by priority (high → medium → low), then by ID (newest first)
     const priorityOrder: Record<string, number> = {
       high: 0,
@@ -188,17 +198,15 @@ function sortIssues(issues: Issue[], sortBy: string): void {
     // Sort by issue ID (newest first)
     issues.sort((a, b) => b.id.localeCompare(a.id))
   } else {
-    // Invalid sort option - default to priority sort
-    const priorityOrder: Record<string, number> = {
-      high: 0,
-      medium: 1,
-      low: 2,
-    }
+    // Invalid sort option - default to roadmap order
     issues.sort((a, b) => {
-      const priorityA = priorityOrder[a.frontmatter.priority] ?? 999
-      const priorityB = priorityOrder[b.frontmatter.priority] ?? 999
-      if (priorityA !== priorityB) return priorityA - priorityB
-      return b.id.localeCompare(a.id) // newest first within priority
+      const orderA = a.frontmatter.order
+      const orderB = b.frontmatter.order
+      if (orderA && orderB)
+        return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
+      if (orderA && !orderB) return -1
+      if (!orderA && orderB) return 1
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
     })
   }
 }
@@ -211,12 +219,12 @@ function sortIssues(issues: Issue[], sortBy: string): void {
  * - `priority:high` / `priority:medium` / `priority:low` - filters by priority
  * - `type:bug` / `type:improvement` - filters by type
  * - `label:x` - filters by label (case-insensitive partial match)
- * - `sort:priority` / `sort:created` / `sort:created-asc` / `sort:updated` / `sort:id` - sorts results
+ * - `sort:roadmap` / `sort:priority` / `sort:created` / `sort:created-asc` / `sort:updated` / `sort:id` - sorts results
  *
  * Any remaining free text after qualifiers triggers fuzzy search across title,
  * description, labels, and content. Results are sorted by relevance when search
  * text is present. When no search text is provided, results are sorted by the
- * `sort:` qualifier (defaults to priority if not specified). ID prefix matching
+ * `sort:` qualifier (defaults to roadmap if not specified). ID prefix matching
  * is supported (e.g., "1" matches #0001).
  *
  * Invalid qualifier values are ignored (issue passes filter).
@@ -326,7 +334,7 @@ export function filterByQuery(issues: Issue[], query: string): Issue[] {
 
   // Apply sorting if no search text (search text uses relevance sorting)
   if (!parsed.searchText.trim()) {
-    const sortBy = parsed.qualifiers.sort?.toLowerCase() || 'priority'
+    const sortBy = parsed.qualifiers.sort?.toLowerCase() || 'roadmap'
     sortIssues(result, sortBy)
   }
 

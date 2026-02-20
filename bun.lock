@@ -13,7 +13,7 @@
     },
     "packages/cli": {
       "name": "issy",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "bin": {
         "issy": "bin/issy",
       },
@@ -25,15 +25,16 @@
     },
     "packages/core": {
       "name": "@miketromba/issy-core",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "date-fns": "^4.1.0",
+        "fractional-indexing": "^3.2.0",
         "fuse.js": "^7.1.0",
       },
     },
     "packages/ui": {
       "name": "@miketromba/issy-app",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@miketromba/issy-core": "^0.2.1",
         "bun-plugin-tailwind": "^0.1.2",
@@ -223,6 +224,8 @@
     "enhanced-resolve": ["enhanced-resolve@5.19.0", "", { "dependencies": { "graceful-fs": "^4.2.4", "tapable": "^2.3.0" } }, "sha512-phv3E1Xl4tQOShqSte26C7Fl84EwUdZsyOuSSk9qtAGyyQs2s3jJzComh+Abf4g187lUUAvH+H26omrqia2aGg=="],
 
     "escape-goat": ["escape-goat@4.0.0", "", {}, "sha512-2Sd4ShcWxbx6OY1IHyla/CVNwvg7XwZVoXZHcSu9w9SReNP1EzzD5T8NWKIR38fIqEns9kDWKUQTXXAmlDrdPg=="],
+
+    "fractional-indexing": ["fractional-indexing@3.2.0", "", {}, "sha512-PcOxmqwYCW7O2ovKRU8OoQQj2yqTfEB/yeTYk4gPid6dN5ODRfU1hXd9tTVZzax/0NkO7AxpHykvZnT1aYp/BQ=="],
 
     "fuse.js": ["fuse.js@7.1.0", "", {}, "sha512-trLf4SzuuUxfusZADLINj+dE8clK1frKdmqiJNb1Es75fmI5oY6X2mxLVUciLLjxqw/xr72Dhy+lER6dGd02FQ=="],
 

@@ -1,9 +1,6 @@
 import type { Issue, IssueFrontmatter } from '@miketromba/issy-core'
 import { filterByQuery } from '@miketromba/issy-core'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ConfirmModal } from './components/ConfirmModal'
-import { CreateIssueModal } from './components/CreateIssueModal'
-import { EditIssueModal } from './components/EditIssueModal'
 import { FilterBar } from './components/FilterBar'
 import { IssueDetail } from './components/IssueDetail'
 import { IssueList } from './components/IssueList'
@@ -11,7 +8,6 @@ import { QueryHelpModal } from './components/QueryHelpModal'
 import { SearchInput } from './components/SearchInput'
 import { SettingsModal } from './components/SettingsModal'
 
-// Re-export types for components
 export type { Issue, IssueFrontmatter }
 
 interface FilterState {
@@ -50,7 +46,6 @@ function loadState(): { filters: FilterState; selectedIssueId: string | null } {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored)
-      // Migrate old filter format to new query format
       if (parsed.filters && !parsed.filters.query) {
         const oldFilters = parsed.filters
         const queryParts: string[] = []
@@ -70,7 +65,7 @@ function loadState(): { filters: FilterState; selectedIssueId: string | null } {
     console.error('Failed to load state from localStorage:', e)
   }
   return {
-    filters: { query: 'is:open' }, // Default to showing open issues
+    filters: { query: 'is:open' },
     selectedIssueId: null,
   }
 }
@@ -99,15 +94,7 @@ export function App() {
   const [showHelp, setShowHelp] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [settings, setSettings] = useState<Settings>(loadSettings)
-  const [showCreate, setShowCreate] = useState(false)
-  const [showEdit, setShowEdit] = useState(false)
-  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
-  const [showReopenConfirm, setShowReopenConfirm] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [actionLoading, setActionLoading] = useState(false)
 
-  // Fetch issues function - reusable for refresh
   const fetchIssues = useCallback(async (showLoading = false) => {
     try {
       if (showLoading) setLoading(true)
@@ -123,12 +110,10 @@ export function App() {
     }
   }, [])
 
-  // Initial fetch
   useEffect(() => {
     fetchIssues(true)
   }, [fetchIssues])
 
-  // Auto-refresh when window regains focus or tab becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -166,58 +151,6 @@ export function App() {
     setSelectedIssueId(id)
   }, [])
 
-  const handleCloseIssue = useCallback(async () => {
-    if (!selectedIssueId || actionLoading) return
-    setActionLoading(true)
-    try {
-      const response = await fetch(`/api/issues/${selectedIssueId}/close`, {
-        method: 'POST',
-      })
-      if (!response.ok) throw new Error('Failed to close issue')
-      setShowCloseConfirm(false)
-      await fetchIssues()
-    } catch (e) {
-      console.error('Failed to close issue:', e)
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedIssueId, actionLoading, fetchIssues])
-
-  const handleReopenIssue = useCallback(async () => {
-    if (!selectedIssueId || actionLoading) return
-    setActionLoading(true)
-    try {
-      const response = await fetch(`/api/issues/${selectedIssueId}/reopen`, {
-        method: 'POST',
-      })
-      if (!response.ok) throw new Error('Failed to reopen issue')
-      setShowReopenConfirm(false)
-      await fetchIssues()
-    } catch (e) {
-      console.error('Failed to reopen issue:', e)
-    } finally {
-      setActionLoading(false)
-    }
-  }, [selectedIssueId, actionLoading, fetchIssues])
-
-  const handleDeleteIssue = useCallback(async () => {
-    if (!selectedIssueId || isDeleting) return
-    setIsDeleting(true)
-    try {
-      const response = await fetch(`/api/issues/${selectedIssueId}/delete`, {
-        method: 'DELETE',
-      })
-      if (!response.ok) throw new Error('Failed to delete issue')
-      setShowDeleteConfirm(false)
-      setSelectedIssueId(null)
-      await fetchIssues()
-    } catch (e) {
-      console.error('Failed to delete issue:', e)
-    } finally {
-      setIsDeleting(false)
-    }
-  }, [selectedIssueId, isDeleting, fetchIssues])
-
   const filteredIssues = useMemo(() => {
     return filterByQuery(issues, filters.query)
   }, [issues, filters.query])
@@ -244,7 +177,6 @@ export function App() {
 
   return (
     <div className="flex h-screen font-sans text-sm leading-relaxed bg-background text-text-primary">
-      {/* Sidebar - hidden on mobile when issue is selected */}
       <aside
         className={`w-full md:w-[382px] md:min-w-[382px] border-r border-border flex flex-col h-screen bg-background ${
           selectedIssue ? 'hidden md:flex' : 'flex'
@@ -253,22 +185,6 @@ export function App() {
         <div className="p-4 border-b md:p-5 border-border">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-lg font-semibold text-text-primary">issy</h1>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary bg-surface hover:bg-surface-elevated border border-border rounded-lg transition-colors"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              New
-            </button>
           </div>
 
           <SearchInput
@@ -323,7 +239,6 @@ export function App() {
         </div>
       </aside>
 
-      {/* Main content - full width on mobile when issue selected, hidden when no issue on mobile */}
       <main
         className={`flex-1 h-screen overflow-y-auto bg-background custom-scrollbar ${
           selectedIssue ? 'block' : 'hidden md:block'
@@ -333,10 +248,6 @@ export function App() {
           <IssueDetail
             issue={selectedIssue}
             onBack={() => handleSelectIssue(null)}
-            onEdit={() => setShowEdit(true)}
-            onClose={() => setShowCloseConfirm(true)}
-            onReopen={() => setShowReopenConfirm(true)}
-            onDelete={() => setShowDeleteConfirm(true)}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-text-muted text-[15px]">
@@ -345,7 +256,6 @@ export function App() {
         )}
       </main>
 
-      {/* Modals */}
       <QueryHelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       <SettingsModal
@@ -353,50 +263,6 @@ export function App() {
         onClose={() => setShowSettings(false)}
         autocompleteEnabled={settings.autocompleteEnabled}
         onAutocompleteChange={handleAutocompleteChange}
-      />
-
-      <CreateIssueModal
-        isOpen={showCreate}
-        onClose={() => setShowCreate(false)}
-        onCreated={fetchIssues}
-      />
-
-      <EditIssueModal
-        issue={selectedIssue}
-        isOpen={showEdit}
-        onClose={() => setShowEdit(false)}
-        onUpdated={fetchIssues}
-      />
-
-      <ConfirmModal
-        isOpen={showCloseConfirm}
-        title="Close Issue"
-        message={`Are you sure you want to close issue #${selectedIssue?.id}?`}
-        confirmText="Close Issue"
-        onConfirm={handleCloseIssue}
-        onCancel={() => setShowCloseConfirm(false)}
-        isLoading={actionLoading}
-      />
-
-      <ConfirmModal
-        isOpen={showReopenConfirm}
-        title="Reopen Issue"
-        message={`Are you sure you want to reopen issue #${selectedIssue?.id}?`}
-        confirmText="Reopen Issue"
-        onConfirm={handleReopenIssue}
-        onCancel={() => setShowReopenConfirm(false)}
-        isLoading={actionLoading}
-      />
-
-      <ConfirmModal
-        isOpen={showDeleteConfirm}
-        title="Delete Issue"
-        message={`Are you sure you want to permanently delete issue #${selectedIssue?.id}? This action cannot be undone.`}
-        confirmText="Delete"
-        confirmVariant="danger"
-        onConfirm={handleDeleteIssue}
-        onCancel={() => setShowDeleteConfirm(false)}
-        isLoading={isDeleting}
       />
     </div>
   )

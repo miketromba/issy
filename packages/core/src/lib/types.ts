@@ -10,6 +10,7 @@ export interface IssueFrontmatter {
   type: 'bug' | 'improvement'
   labels?: string
   status: 'open' | 'closed'
+  order?: string
   created: string
   updated?: string
 }
@@ -36,6 +37,7 @@ export interface CreateIssueInput {
   scope?: 'small' | 'medium' | 'large'
   type?: 'bug' | 'improvement'
   labels?: string
+  order?: string
 }
 
 export interface UpdateIssueInput {
@@ -46,4 +48,5 @@ export interface UpdateIssueInput {
   type?: 'bug' | 'improvement'
   labels?: string
   status?: 'open' | 'closed'
+  order?: string
 }

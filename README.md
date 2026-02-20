@@ -25,7 +25,7 @@ issy gives AI coding assistants a skill for managing issues. Just talk naturally
 
 > "Close the auth bug, it's fixed"
 
-The assistant creates, searches, updates, and closes issues for you. Issues are stored as markdown files in `.issues/` — readable, diffable, and committed with your code.
+The assistant creates, searches, updates, and closes issues for you. Issues are stored as markdown files in `.issy/issues/` — readable, diffable, and committed with your code.
 
 ## Install the Skill
 
@@ -70,7 +70,8 @@ Once installed globally, you can run commands from your terminal:
 
 ```bash
 issy                          # Start the web UI
-issy list                     # List open issues
+issy list                     # List open issues (roadmap order)
+issy next                     # Show next issue to work on
 issy create --title "Bug"     # Create issue
 ```
 
@@ -104,7 +105,7 @@ You can continue to use your global installation to run commands. Global `issy` 
 issy
 ```
 
-Opens a local UI at `http://localhost:1554` for browsing and editing issues.
+Opens a local read-only UI at `http://localhost:1554` for browsing issues.
 
 <p align="center">
   <img src="assets/web-ui-screenshot.png" alt="issy web UI" width="800" />
@@ -113,30 +114,70 @@ Opens a local UI at `http://localhost:1554` for browsing and editing issues.
 ### CLI
 
 ```bash
-issy init                     # Create .issues/ directory
+issy init                     # Create .issy/issues/ directory
 issy init --seed              # Create with a welcome issue
-issy list                     # List open issues
+issy list                     # List open issues (roadmap order)
+issy next                     # Show next issue to work on
 issy search "auth"            # Fuzzy search
 issy read 0001                # View issue
-issy create --title "Bug"     # Create issue
+issy create --title "Bug" --after 0002    # Create issue after #0002
+issy update 0001 --before 0003            # Reposition in roadmap
 issy close 0001               # Close issue
+issy reopen 0001 --after 0004 # Reopen and place in roadmap
+issy migrate                  # Migrate from .issues/ to .issy/
 issy --version                # Check version
 ```
 
 Run `issy help` for full options.
 
+### Roadmap Ordering
+
+Every open issue has a position in the **roadmap** — a strict ordering that reflects logical dependencies. When creating or reopening an issue while others are open, you must specify where it fits:
+
+```bash
+issy create --title "Add auth" --after 0001     # Insert after issue #0001
+issy create --title "Fix bug" --before 0003     # Insert before issue #0003
+issy create --title "Urgent" --first            # Insert at the beginning
+issy create --title "Backlog item" --last       # Insert at the end
+```
+
+`issy next` always returns the first open issue in roadmap order — the next thing to work on.
+
+`issy list` sorts by roadmap order by default. Other sort options are available:
+
+```bash
+issy list --sort priority     # Sort by priority instead
+issy list --sort created      # Sort by creation date
+```
+
+### On-Close Hook
+
+Create a `.issy/on_close.md` file to inject context after every successful close. The file contents are printed to stdout, making them visible to AI agents in their command output. Use this for post-close reminders like updating documentation.
+
 ### Monorepo Support
 
-issy automatically walks up from the current directory to find an existing `.issues/` folder. This means you can run `npx issy` from any subdirectory (e.g., `packages/foo/`) and it will find and use the repo root's issues.
+issy automatically walks up from the current directory to find an existing `.issy/` folder. This means you can run `npx issy` from any subdirectory (e.g., `packages/foo/`) and it will find and use the repo root's issues.
 
 ```bash
 # In a monorepo, issues are typically at the root:
 my-monorepo/
-  .issues/           # ← issy finds this automatically
+  .issy/              # ← issy finds this automatically
+    issues/
+    on_close.md
   packages/
-    frontend/        # ← works from here
-    backend/         # ← or here
+    frontend/         # ← works from here
+    backend/          # ← or here
 ```
+
+### Migration from v0.4
+
+If upgrading from v0.4.x (which used `.issues/`), run:
+
+```bash
+issy migrate
+```
+
+This moves your issues to `.issy/issues/` and assigns roadmap order to all open issues.
 
 ---
 
@@ -150,6 +191,7 @@ priority: high
 scope: medium
 type: bug
 status: open
+order: a0
 created: 2025-01-15T10:30:00
 ---
 
@@ -166,12 +208,13 @@ session isn't established, causing a redirect loop.
 | `type` | `bug`, `improvement` |
 | `status` | `open`, `closed` |
 | `labels` | comma-separated (optional) |
+| `order` | fractional index key (managed by issy) |
 
 ## Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ISSUES_DIR` | Issues directory path | `./.issues` |
+| `ISSY_DIR` | Issy directory path | `./.issy` |
 | `ISSUES_PORT` | UI server port | `1554` |
 
 <details>

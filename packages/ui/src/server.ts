@@ -10,25 +10,14 @@ import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-  type CreateIssueInput,
-  closeIssue,
-  createIssue,
-  deleteIssue,
   filterAndSearchIssues,
   filterByQuery,
   getAllIssues,
   getIssue,
-  reopenIssue,
-  resolveIssuesDir,
-  type UpdateIssueInput,
-  updateIssue,
+  resolveIssyDir,
 } from '@miketromba/issy-core'
 
-// Initialize issues directory with smart resolution:
-// 1. ISSUES_DIR env var (explicit override)
-// 2. Walk up from cwd to find existing .issues directory
-// 3. Fall back to cwd/.issues
-resolveIssuesDir()
+resolveIssyDir()
 
 const PORT = Number(process.env.ISSUES_PORT || process.env.PORT || 1554)
 
@@ -48,26 +37,6 @@ const mimeTypes: Record<string, string> = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
-}
-
-// Helper to parse JSON body
-async function parseBody(
-  req: import('node:http').IncomingMessage,
-): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    req.on('data', (chunk) => {
-      body += chunk
-    })
-    req.on('end', () => {
-      try {
-        resolve(body ? JSON.parse(body) : {})
-      } catch (e) {
-        reject(e)
-      }
-    })
-    req.on('error', reject)
-  })
 }
 
 // Helper to send JSON response
@@ -141,13 +110,6 @@ const server = createServer(async (req, res) => {
         return jsonResponse(res, allIssues)
       }
 
-      // POST /api/issues/create - Create a new issue
-      if (path === '/api/issues/create' && method === 'POST') {
-        const input = (await parseBody(req)) as CreateIssueInput
-        const issue = await createIssue(input)
-        return jsonResponse(res, issue, 201)
-      }
-
       // GET /api/health - Health check
       if (path === '/api/health' && method === 'GET') {
         return jsonResponse(res, { status: 'ok', service: 'issy' })
@@ -167,31 +129,12 @@ const server = createServer(async (req, res) => {
         }
 
         if (method === 'PATCH') {
-          const input = (await parseBody(req)) as UpdateIssueInput
-          const issue = await updateIssue(id, input)
-          return jsonResponse(res, issue)
+          return jsonResponse(
+            res,
+            { error: 'Mutations are only supported via the CLI.' },
+            405,
+          )
         }
-      }
-
-      // POST /api/issues/:id/close
-      const closeMatch = matchRoute('/api/issues/:id/close', path)
-      if (closeMatch.match && method === 'POST') {
-        const issue = await closeIssue(closeMatch.params.id)
-        return jsonResponse(res, issue)
-      }
-
-      // POST /api/issues/:id/reopen
-      const reopenMatch = matchRoute('/api/issues/:id/reopen', path)
-      if (reopenMatch.match && method === 'POST') {
-        const issue = await reopenIssue(reopenMatch.params.id)
-        return jsonResponse(res, issue)
-      }
-
-      // DELETE /api/issues/:id/delete
-      const deleteMatch = matchRoute('/api/issues/:id/delete', path)
-      if (deleteMatch.match && method === 'DELETE') {
-        await deleteIssue(deleteMatch.params.id)
-        return jsonResponse(res, { success: true })
       }
 
       // API route not found

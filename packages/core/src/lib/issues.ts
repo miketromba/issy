@@ -6,6 +6,7 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 import type {
   CreateIssueInput,
   Issue,
@@ -13,58 +14,85 @@ import type {
   UpdateIssueInput,
 } from './types'
 
-// Default issues directory - can be overridden
+let issyDir: string | null = null
 let issuesDir: string | null = null
 
+export function setIssyDir(dir: string) {
+  issyDir = dir
+  issuesDir = join(dir, 'issues')
+}
+
+export function getIssyDir(): string {
+  if (!issyDir) {
+    throw new Error(
+      'Issy directory not initialized. Call resolveIssyDir() first.',
+    )
+  }
+  return issyDir
+}
+
 /**
- * Initialize the issues directory path
+ * @deprecated Use setIssyDir() instead
  */
 export function setIssuesDir(dir: string) {
   issuesDir = dir
 }
 
-/**
- * Get the issues directory path
- */
 export function getIssuesDir(): string {
   if (!issuesDir) {
     throw new Error(
-      'Issues directory not initialized. Call setIssuesDir() or resolveIssuesDir() first.',
+      'Issues directory not initialized. Call resolveIssyDir() first.',
     )
   }
   return issuesDir
 }
 
-/**
- * Ensure issues directory exists
- */
 export async function ensureIssuesDir(): Promise<void> {
   await mkdir(getIssuesDir(), { recursive: true })
 }
 
 /**
- * Try to find .issues directory by walking up from the given path.
- * Returns the path if found, or null if not found.
+ * Try to find .issy directory by walking up from the given path.
  */
-export function findIssuesDirUpward(fromPath: string): string | null {
+export function findIssyDirUpward(fromPath: string): string | null {
   let current = resolve(fromPath)
-  // Walk up to 20 levels (reasonable for most project structures)
   for (let i = 0; i < 20; i++) {
-    const candidate = join(current, '.issues')
+    const candidate = join(current, '.issy')
     if (existsSync(candidate)) {
       return candidate
     }
     const parent = dirname(current)
-    if (parent === current) break // reached filesystem root
+    if (parent === current) break
     current = parent
   }
   return null
 }
 
 /**
- * Find the git repository root by walking up from the given path.
- * Returns the directory containing .git, or null if not in a git repo.
+ * Try to find legacy .issues directory by walking up from the given path.
+ * Used for migration detection.
  */
+export function findLegacyIssuesDirUpward(fromPath: string): string | null {
+  let current = resolve(fromPath)
+  for (let i = 0; i < 20; i++) {
+    const candidate = join(current, '.issues')
+    if (existsSync(candidate)) {
+      return candidate
+    }
+    const parent = dirname(current)
+    if (parent === current) break
+    current = parent
+  }
+  return null
+}
+
+/**
+ * @deprecated Use findIssyDirUpward() instead
+ */
+export function findIssuesDirUpward(fromPath: string): string | null {
+  return findIssyDirUpward(fromPath) ?? findLegacyIssuesDirUpward(fromPath)
+}
+
 export function findGitRoot(fromPath: string): string | null {
   let current = resolve(fromPath)
   for (let i = 0; i < 20; i++) {
@@ -73,64 +101,78 @@ export function findGitRoot(fromPath: string): string | null {
       return current
     }
     const parent = dirname(current)
-    if (parent === current) break // reached filesystem root
+    if (parent === current) break
     current = parent
   }
   return null
 }
 
 /**
- * Resolve the issues directory using the following priority:
- * 1. ISSUES_DIR env var (explicit override)
- * 2. Walk up from ISSUES_ROOT or cwd to find existing .issues directory
- * 3. If in a git repo, use .issues at the repo root
- * 4. Fall back to creating .issues in ISSUES_ROOT or cwd
+ * Resolve the .issy directory using the following priority:
+ * 1. ISSY_DIR env var (explicit override)
+ * 2. Walk up from cwd to find existing .issy directory
+ * 3. If in a git repo, use .issy at the repo root
+ * 4. Fall back to cwd/.issy
  *
- * This also sets the internal issuesDir variable.
+ * Also detects legacy .issues/ directories and warns.
  */
-export function resolveIssuesDir(): string {
-  // 1. Explicit override via ISSUES_DIR
-  if (process.env.ISSUES_DIR) {
-    const dir = resolve(process.env.ISSUES_DIR)
-    setIssuesDir(dir)
+export function resolveIssyDir(): string {
+  if (process.env.ISSY_DIR) {
+    const dir = resolve(process.env.ISSY_DIR)
+    setIssyDir(dir)
     return dir
   }
 
-  // 2. Try to find existing .issues by walking up from start directory
-  const startDir = process.env.ISSUES_ROOT || process.cwd()
-  const found = findIssuesDirUpward(startDir)
+  const startDir = process.env.ISSY_ROOT || process.cwd()
+
+  const found = findIssyDirUpward(startDir)
   if (found) {
-    setIssuesDir(found)
+    setIssyDir(found)
     return found
   }
 
-  // 3. If in a git repo, use .issues at the repo root
   const gitRoot = findGitRoot(startDir)
   if (gitRoot) {
-    const gitIssuesDir = join(gitRoot, '.issues')
-    setIssuesDir(gitIssuesDir)
-    return gitIssuesDir
+    const gitIssyDir = join(gitRoot, '.issy')
+    setIssyDir(gitIssyDir)
+    return gitIssyDir
   }
 
-  // 4. Fall back to creating .issues in the start directory
-  const fallback = join(resolve(startDir), '.issues')
-  setIssuesDir(fallback)
+  const fallback = join(resolve(startDir), '.issy')
+  setIssyDir(fallback)
   return fallback
 }
 
 /**
- * Auto-detect issues directory from common locations
- * @deprecated Use resolveIssuesDir() instead, which handles all cases
+ * @deprecated Use resolveIssyDir() instead
  */
-export function autoDetectIssuesDir(fromPath: string): string {
-  const found = findIssuesDirUpward(fromPath)
-  if (found) return found
-  throw new Error('Could not find .issues directory')
+export function resolveIssuesDir(): string {
+  resolveIssyDir()
+  return getIssuesDir()
 }
 
 /**
- * Parse YAML front matter from issue content
+ * @deprecated Use resolveIssyDir() instead
  */
+export function autoDetectIssuesDir(fromPath: string): string {
+  const found = findIssyDirUpward(fromPath)
+  if (found) {
+    setIssyDir(found)
+    return getIssuesDir()
+  }
+  throw new Error('Could not find .issy directory')
+}
+
+/**
+ * Check if a legacy .issues/ directory exists (not inside .issy/)
+ */
+export function hasLegacyIssuesDir(): string | null {
+  const startDir = process.env.ISSY_ROOT || process.cwd()
+  return findLegacyIssuesDirUpward(startDir)
+}
+
+// --- Frontmatter ---
+
 export function parseFrontmatter(content: string): {
   frontmatter: Partial<IssueFrontmatter>
   body: string
@@ -155,9 +197,6 @@ export function parseFrontmatter(content: string): {
   return { frontmatter, body }
 }
 
-/**
- * Generate YAML front matter string from issue data
- */
 export function generateFrontmatter(data: IssueFrontmatter): string {
   const lines = ['---']
   lines.push(`title: ${data.title}`)
@@ -171,6 +210,9 @@ export function generateFrontmatter(data: IssueFrontmatter): string {
     lines.push(`labels: ${data.labels}`)
   }
   lines.push(`status: ${data.status}`)
+  if (data.order) {
+    lines.push(`order: ${data.order}`)
+  }
   lines.push(`created: ${data.created}`)
   if (data.updated) {
     lines.push(`updated: ${data.updated}`)
@@ -179,17 +221,13 @@ export function generateFrontmatter(data: IssueFrontmatter): string {
   return lines.join('\n')
 }
 
-/**
- * Get issue ID from filename (e.g., "0001-fix-bug.md" -> "0001")
- */
+// --- File operations ---
+
 export function getIssueIdFromFilename(filename: string): string {
   const match = filename.match(/^(\d+)-/)
   return match ? match[1] : filename.replace('.md', '')
 }
 
-/**
- * Create URL-friendly slug from title
- */
 export function createSlug(title: string): string {
   return title
     .toLowerCase()
@@ -199,17 +237,10 @@ export function createSlug(title: string): string {
     .slice(0, 50)
 }
 
-/**
- * Format date as ISO 8601 timestamp (YYYY-MM-DDTHH:mm:ss)
- * This provides second-level precision for better sorting
- */
 export function formatDate(date: Date = new Date()): string {
   return date.toISOString().slice(0, 19)
 }
 
-/**
- * Get all issue filenames from the issues directory
- */
 export async function getIssueFiles(): Promise<string[]> {
   try {
     const files = await readdir(getIssuesDir())
@@ -219,9 +250,6 @@ export async function getIssueFiles(): Promise<string[]> {
   }
 }
 
-/**
- * Get the next available issue number
- */
 export async function getNextIssueNumber(): Promise<string> {
   const files = await getIssueFiles()
   if (files.length === 0) return '0001'
@@ -234,9 +262,6 @@ export async function getNextIssueNumber(): Promise<string> {
   return String(max + 1).padStart(4, '0')
 }
 
-/**
- * Load a single issue by ID
- */
 export async function getIssue(id: string): Promise<Issue | null> {
   const files = await getIssueFiles()
   const paddedId = id.padStart(4, '0')
@@ -259,9 +284,6 @@ export async function getIssue(id: string): Promise<Issue | null> {
   }
 }
 
-/**
- * Load all issues
- */
 export async function getAllIssues(): Promise<Issue[]> {
   const files = await getIssueFiles()
   const issues: Issue[] = []
@@ -279,23 +301,102 @@ export async function getAllIssues(): Promise<Issue[]> {
     })
   }
 
-  // Sort by priority (high → medium → low), then by ID (newest first) within each priority
-  const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 }
+  // Default sort: roadmap order for issues that have it, then by ID
   return issues.sort((a, b) => {
-    const priorityA = priorityOrder[a.frontmatter.priority] ?? 999
-    const priorityB = priorityOrder[b.frontmatter.priority] ?? 999
-
-    if (priorityA !== priorityB) {
-      return priorityA - priorityB
-    }
-    // Within same priority, sort by ID descending (newest first)
-    return b.id.localeCompare(a.id)
+    const orderA = a.frontmatter.order
+    const orderB = b.frontmatter.order
+    if (orderA && orderB) return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
+    if (orderA && !orderB) return -1
+    if (!orderA && orderB) return 1
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
   })
 }
 
+// --- Roadmap ordering ---
+
 /**
- * Create a new issue
+ * Get all open issues sorted by roadmap order.
  */
+export async function getOpenIssuesByOrder(): Promise<Issue[]> {
+  const allIssues = await getAllIssues()
+  return allIssues.filter((i) => i.frontmatter.status === 'open')
+}
+
+/**
+ * Compute a fractional index key for inserting relative to existing issues.
+ *
+ * @param openIssues - Open issues already sorted by order
+ * @param options - positioning: before/after target ID, or first/last boolean
+ * @param excludeId - Exclude this issue from consideration (for repositioning)
+ */
+export function computeOrderKey(
+  openIssues: Issue[],
+  options: {
+    before?: string
+    after?: string
+    first?: boolean
+    last?: boolean
+  },
+  excludeId?: string,
+): string {
+  const issues = excludeId
+    ? openIssues.filter((i) => i.id !== excludeId.padStart(4, '0'))
+    : openIssues
+
+  if (options.first) {
+    if (issues.length === 0) return generateKeyBetween(null, null)
+    const firstOrder = issues[0].frontmatter.order || null
+    return generateKeyBetween(null, firstOrder)
+  }
+
+  if (options.last) {
+    if (issues.length === 0) return generateKeyBetween(null, null)
+    const lastOrder = issues[issues.length - 1].frontmatter.order || null
+    return generateKeyBetween(lastOrder, null)
+  }
+
+  if (options.after) {
+    const targetId = options.after.padStart(4, '0')
+    const idx = issues.findIndex((i) => i.id === targetId)
+    if (idx === -1)
+      throw new Error(
+        `Issue #${options.after} not found among open issues. The --after target must be an open issue.`,
+      )
+    const afterOrder = issues[idx].frontmatter.order || null
+    const nextOrder =
+      idx + 1 < issues.length ? issues[idx + 1].frontmatter.order || null : null
+    return generateKeyBetween(afterOrder, nextOrder)
+  }
+
+  if (options.before) {
+    const targetId = options.before.padStart(4, '0')
+    const idx = issues.findIndex((i) => i.id === targetId)
+    if (idx === -1)
+      throw new Error(
+        `Issue #${options.before} not found among open issues. The --before target must be an open issue.`,
+      )
+    const beforeOrder = issues[idx].frontmatter.order || null
+    const prevOrder = idx > 0 ? issues[idx - 1].frontmatter.order || null : null
+    return generateKeyBetween(prevOrder, beforeOrder)
+  }
+
+  // No before/after: append at end (used for first issue or migration)
+  if (issues.length === 0) {
+    return generateKeyBetween(null, null)
+  }
+  const lastOrder = issues[issues.length - 1].frontmatter.order || null
+  return generateKeyBetween(lastOrder, null)
+}
+
+/**
+ * Generate evenly-spaced order keys for a batch of items (used during migration).
+ */
+export function generateBatchOrderKeys(count: number): string[] {
+  return generateNKeysBetween(null, null, count)
+}
+
+// --- CRUD ---
+
 export async function createIssue(input: CreateIssueInput): Promise<Issue> {
   await ensureIssuesDir()
   if (!input.title) {
@@ -330,6 +431,7 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
     type,
     labels: input.labels || undefined,
     status: 'open',
+    order: input.order || undefined,
     created: formatDate(),
   }
 
@@ -351,9 +453,6 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
   }
 }
 
-/**
- * Update an existing issue
- */
 export async function updateIssue(
   id: string,
   input: UpdateIssueInput,
@@ -364,7 +463,6 @@ export async function updateIssue(
     throw new Error(`Issue not found: ${id}`)
   }
 
-  // Update fields
   const updatedFrontmatter: IssueFrontmatter = {
     ...issue.frontmatter,
     ...(input.title && { title: input.title }),
@@ -376,6 +474,7 @@ export async function updateIssue(
       labels: input.labels || undefined,
     }),
     ...(input.status && { status: input.status }),
+    ...(input.order && { order: input.order }),
     updated: formatDate(),
   }
 
@@ -390,23 +489,14 @@ ${issue.content}`
   }
 }
 
-/**
- * Close an issue
- */
 export async function closeIssue(id: string): Promise<Issue> {
   return updateIssue(id, { status: 'closed' })
 }
 
-/**
- * Reopen an issue
- */
-export async function reopenIssue(id: string): Promise<Issue> {
-  return updateIssue(id, { status: 'open' })
+export async function reopenIssue(id: string, order?: string): Promise<Issue> {
+  return updateIssue(id, { status: 'open', order })
 }
 
-/**
- * Delete an issue permanently
- */
 export async function deleteIssue(id: string): Promise<void> {
   const issue = await getIssue(id)
 
@@ -416,4 +506,28 @@ export async function deleteIssue(id: string): Promise<void> {
 
   const { unlink } = await import('node:fs/promises')
   await unlink(join(getIssuesDir(), issue.filename))
+}
+
+// --- Hooks ---
+
+/**
+ * Read the on_close.md hook content if it exists.
+ */
+export async function getOnCloseContent(): Promise<string | null> {
+  try {
+    const onClosePath = join(getIssyDir(), 'on_close.md')
+    return await readFile(onClosePath, 'utf-8')
+  } catch {
+    return null
+  }
+}
+
+// --- Next issue ---
+
+/**
+ * Get the next issue to work on: the first open issue in roadmap order.
+ */
+export async function getNextIssue(): Promise<Issue | null> {
+  const openIssues = await getOpenIssuesByOrder()
+  return openIssues.length > 0 ? openIssues[0] : null
 }

@@ -1,6 +1,6 @@
 {
   "name": "issy",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "AI-native issue tracking. Markdown files in .issues/, managed by your coding assistant.",
   "type": "module",
   "license": "MIT",
@@ -35,8 +35,8 @@
     "lint": "biome check src bin"
   },
   "dependencies": {
-    "@miketromba/issy-app": "^0.4.0",
-    "@miketromba/issy-core": "^0.4.0",
+    "@miketromba/issy-app": "^0.5.0",
+    "@miketromba/issy-core": "^0.5.0",
     "update-notifier": "^7.3.1"
   }
 }

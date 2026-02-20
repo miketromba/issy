@@ -1,6 +1,6 @@
 ---
 name: issue-tracking
-description: Project issue tracking system. Use when creating, reading, updating, listing, or closing issues. Triggers on "create an issue", "add a bug", "track a task", "list issues", "show bugs", "what's open", "close issue", or any issue/bug/task management request.
+description: Project issue tracking system. Use when creating, reading, updating, listing, or closing issues. Triggers on "create an issue", "next issue", "track a task", "list issues", "show bugs", "what's next", "close issue", or any issue/bug/task management request.
 ---
 
 # Track issues with the issy CLI
@@ -24,9 +24,9 @@ When possible, include verification steps or hints that tell the implementing ag
 
 **Why include verification?** Agents should never claim work is done without evidence. If the issue itself describes how to verify, the implementing agent can follow those steps and provide concrete proof (command output, test results, screenshots, etc.).
 
-**What to include (pick what fits):**
+**Verification examples:**
 - Commands to run and expected output (`curl`, CLI commands, `bun test`)
-- UI flows to test (can use `agent-browser` skill for automation)
+- UI flows to test (can use `agent-browser` skill if available for automation)
 - Database queries to confirm state changes
 - Specific behavior to observe or confirm
 - Edge cases to check
@@ -65,18 +65,40 @@ After deployment, `curl https://api.example.com/health` should return `{"status"
 
 **The rule:** Capture what the user says. If they provide implementation details, include them. If they don't, keep it high-level.
 
+## Roadmap Ordering
+
+issy maintains a **roadmap** — a strict, intentional ordering of all open issues. Every open issue has a position in the roadmap, and the ordering is designed to be dependency-aware and chronological. No issue should be blocked by one that follows it.
+
+### Rules
+
+- When **creating** an issue: if there are already open issues, you **must** provide a position flag: `--before <id>`, `--after <id>`, `--first`, or `--last`.
+- When **reopening** an issue: same rule — provide a position flag if there are other open issues.
+- When **updating** an issue: optionally provide a position flag to reposition it in the roadmap.
+- `issy next` returns the first open issue in roadmap order — the next unit of work.
+- `issy list` sorts by roadmap order by default.
+
+### Choosing placement
+
+Think about logical dependency when choosing position:
+- If issue B requires work from issue A to be done first, A must come before B.
+- Place foundational/infrastructure work early, user-facing features later.
+- Use `--first` for urgent work that should be tackled immediately.
+- Use `--last` when in doubt — appends to the end of the roadmap.
+- Use `--before <id>` or `--after <id>` for precise placement between existing issues.
+
 ## CLI Commands
 
 Use the `issy` CLI. If not installed, install it globally using the project's package manager (e.g., `bun install issy --global`, `pnpm add issy --global`, `npm install issy --global`).
 
 ```bash
-# List issues
+# List issues (roadmap order by default)
 issy list                    # Open issues only
 issy list --all              # Include closed
 issy list --priority high    # Filter: high, medium, low
 issy list --scope small      # Filter: small, medium, large
 issy list --type bug         # Filter: bug, improvement
 issy list --search "keyword" # Fuzzy search
+issy list --sort priority    # Sort: roadmap (default), priority, created, updated, id
 
 # Search issues (fuzzy search with typo tolerance)
 issy search "dashboard"      # Search open issues
@@ -85,18 +107,42 @@ issy search "k8s" --all      # Include closed issues
 # Read issue
 issy read <id>               # e.g., issy read 0001
 
-# Create issue
-issy create --title "Fix login bug" --type bug --priority high --scope small
-issy create --title "Add dark mode" --type improvement --priority medium --scope medium --labels "ui, frontend"
+# Next issue (first open issue in roadmap order)
+issy next
 
-# Update issue
+# Create issue (position flag required when open issues exist)
+issy create --title "Fix login bug" --type bug --priority high --after 0002
+issy create --title "Add dark mode" --type improvement --last --labels "ui, frontend"
+issy create --title "Urgent fix" --first
+
+# Update issue (position flags to reposition in roadmap)
 issy update <id> --priority low
-issy update <id> --scope large
-issy update <id> --status closed
+issy update <id> --after 0003
+issy update <id> --first
 issy update <id> --labels "api, backend"
 
 # Close issue
 issy close <id>
+
+# Reopen issue (position flag required when other open issues exist)
+issy reopen <id> --last
+issy reopen <id> --after 0004
+```
+
+## On-Close Hook
+
+When an issue is closed, issy automatically prints the contents of `.issy/on_close.md` if it exists. This is useful for injecting reminders into the agent's context — for example, prompting the agent to update documentation or run post-close checks.
+
+## Project Structure
+
+Issues are stored in `.issy/issues/` as markdown files with YAML frontmatter. The directory structure:
+
+```
+.issy/
+  issues/
+    0001-fix-login-redirect.md
+    0002-add-dark-mode.md
+  on_close.md    # Optional: printed after successful close
 ```
 
 ## Closing Issues with Learnings
@@ -121,6 +167,7 @@ Keep it brief—just capture what someone revisiting this issue would want to kn
 | type | Yes | `bug`, `improvement` |
 | labels | No | comma-separated strings |
 | status | Yes | `open`, `closed` |
+| order | Auto | fractional index key (managed by issy) |
 
 ## After Mutations
 

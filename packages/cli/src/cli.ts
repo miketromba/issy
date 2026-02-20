@@ -4,35 +4,36 @@
  * issy CLI
  *
  * Usage:
- *   issy list [--all] [--priority <p>] [--scope <s>] [--type <t>] [--search <q>]
+ *   issy list [--all] [--priority <p>] [--scope <s>] [--type <t>] [--search <q>] [--sort <s>]
  *   issy read <id>
  *   issy search <query>
- *   issy create [--title <t>] [--description <d>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>]
- *   issy update <id> [--title <t>] [--description <d>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--status <s>]
+ *   issy create [--title <t>] [--description <d>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
+ *   issy update <id> [--title <t>] [--description <d>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
  *   issy close <id>
+ *   issy reopen <id> [--before <id> | --after <id>]
+ *   issy next
  */
 
 import { parseArgs } from 'node:util'
 
-// Import shared library (simple relative import since we're in the same package)
 import {
   type CreateIssueInput,
   closeIssue,
+  computeOrderKey,
   createIssue,
-  filterAndSearchIssues,
+  filterByQuery,
   getAllIssues,
   getIssue,
-  resolveIssuesDir,
+  getNextIssue,
+  getOnCloseContent,
+  getOpenIssuesByOrder,
+  reopenIssue,
+  resolveIssyDir,
   updateIssue,
 } from '@miketromba/issy-core'
 
-// Initialize issues directory with smart resolution:
-// 1. ISSUES_DIR env var (explicit override)
-// 2. Walk up from cwd to find existing .issues directory
-// 3. Fall back to cwd/.issues
-resolveIssuesDir()
+resolveIssyDir()
 
-// Display helpers
 function prioritySymbol(priority: string): string {
   switch (priority) {
     case 'high':
@@ -50,24 +51,86 @@ function typeSymbol(type: string): string {
   return type === 'bug' ? '🐛' : '✨'
 }
 
-// Commands
+function formatIssueRow(issue: {
+  id: string
+  frontmatter: {
+    priority: string
+    type: string
+    status: string
+    title: string
+  }
+}): string {
+  const status = issue.frontmatter.status === 'open' ? 'OPEN  ' : 'CLOSED'
+  return `  ${issue.id}  ${prioritySymbol(issue.frontmatter.priority)}   ${typeSymbol(issue.frontmatter.type)}    ${status}  ${issue.frontmatter.title.slice(0, 45)}`
+}
+
+/**
+ * Resolve positioning flags into an order key. Validates constraints.
+ */
+async function resolvePosition(opts: {
+  before?: string
+  after?: string
+  first?: boolean
+  last?: boolean
+  requireIfOpenIssues: boolean
+  excludeId?: string
+}): Promise<string> {
+  const openIssues = await getOpenIssuesByOrder()
+  const relevantIssues = opts.excludeId
+    ? openIssues.filter((i) => i.id !== opts.excludeId?.padStart(4, '0'))
+    : openIssues
+
+  const positionFlags = [opts.before, opts.after, opts.first, opts.last].filter(
+    Boolean,
+  ).length
+  if (positionFlags > 1) {
+    throw new Error(
+      'Only one of --before, --after, --first, or --last can be specified.',
+    )
+  }
+
+  const hasPosition = opts.before || opts.after || opts.first || opts.last
+  if (relevantIssues.length > 0 && opts.requireIfOpenIssues && !hasPosition) {
+    const ids = relevantIssues.map((i) => `#${i.id}`).join(', ')
+    throw new Error(
+      `A position flag (--before, --after, --first, or --last) is required when there are open issues. Open issues: ${ids}`,
+    )
+  }
+
+  return computeOrderKey(
+    openIssues,
+    {
+      before: opts.before,
+      after: opts.after,
+      first: opts.first,
+      last: opts.last,
+    },
+    opts.excludeId,
+  )
+}
+
+// --- Commands ---
+
 async function listIssues(options: {
   all?: boolean
   priority?: string
   scope?: string
   type?: string
   search?: string
+  sort?: string
 }) {
   const allIssues = await getAllIssues()
 
-  // Apply filters
-  const issues = filterAndSearchIssues(allIssues, {
-    status: options.all ? undefined : 'open',
-    priority: options.priority,
-    scope: options.scope,
-    type: options.type,
-    search: options.search,
-  })
+  const queryParts: string[] = []
+  if (!options.all) queryParts.push('is:open')
+  if (options.priority) queryParts.push(`priority:${options.priority}`)
+  if (options.scope) queryParts.push(`scope:${options.scope}`)
+  if (options.type) queryParts.push(`type:${options.type}`)
+  if (options.sort) queryParts.push(`sort:${options.sort}`)
+  if (options.search) queryParts.push(options.search)
+
+  const query = queryParts.join(' ') || 'is:open'
+  const issues = filterByQuery(allIssues, query)
 
   if (issues.length === 0) {
     console.log('No issues found.')
@@ -78,14 +141,7 @@ async function listIssues(options: {
   console.log(`  ${'-'.repeat(70)}`)
 
   for (const issue of issues) {
-    const status = issue.frontmatter.status === 'open' ? 'OPEN  ' : 'CLOSED'
-    console.log(
-      `  ${issue.id}  ${prioritySymbol(
-        issue.frontmatter.priority,
-      )}   ${typeSymbol(
-        issue.frontmatter.type,
-      )}    ${status}  ${issue.frontmatter.title.slice(0, 45)}`,
-    )
+    console.log(formatIssueRow(issue))
   }
 
   console.log(`\n  Total: ${issues.length} issue(s)\n`)
@@ -107,9 +163,7 @@ async function readIssue(id: string) {
   console.log(`  ID:          ${issue.id}`)
   console.log(`  Status:      ${issue.frontmatter.status.toUpperCase()}`)
   console.log(
-    `  Priority:    ${prioritySymbol(issue.frontmatter.priority)} ${
-      issue.frontmatter.priority
-    }`,
+    `  Priority:    ${prioritySymbol(issue.frontmatter.priority)} ${issue.frontmatter.priority}`,
   )
   if (issue.frontmatter.scope) {
     console.log(`  Scope:       ${issue.frontmatter.scope}`)
@@ -117,6 +171,9 @@ async function readIssue(id: string) {
   console.log(`  Type:        ${issue.frontmatter.type}`)
   if (issue.frontmatter.labels) {
     console.log(`  Labels:      ${issue.frontmatter.labels}`)
+  }
+  if (issue.frontmatter.order) {
+    console.log(`  Order:       ${issue.frontmatter.order}`)
   }
   console.log(`  Created:     ${issue.frontmatter.created}`)
   if (issue.frontmatter.updated) {
@@ -130,10 +187,8 @@ async function readIssue(id: string) {
 async function searchIssuesCommand(query: string, options: { all?: boolean }) {
   const allIssues = await getAllIssues()
 
-  const issues = filterAndSearchIssues(allIssues, {
-    status: options.all ? undefined : 'open',
-    search: query,
-  })
+  const searchQuery = options.all ? query : `is:open ${query}`
+  const issues = filterByQuery(allIssues, searchQuery)
 
   if (issues.length === 0) {
     console.log(`No issues found matching "${query}".`)
@@ -145,14 +200,7 @@ async function searchIssuesCommand(query: string, options: { all?: boolean }) {
   console.log(`  ${'-'.repeat(70)}`)
 
   for (const issue of issues) {
-    const status = issue.frontmatter.status === 'open' ? 'OPEN  ' : 'CLOSED'
-    console.log(
-      `  ${issue.id}  ${prioritySymbol(
-        issue.frontmatter.priority,
-      )}   ${typeSymbol(
-        issue.frontmatter.type,
-      )}    ${status}  ${issue.frontmatter.title.slice(0, 45)}`,
-    )
+    console.log(formatIssueRow(issue))
   }
 
   console.log(`\n  Found: ${issues.length} issue(s)\n`)
@@ -165,8 +213,11 @@ async function createIssueCommand(options: {
   scope?: string
   type?: string
   labels?: string
+  before?: string
+  after?: string
+  first?: boolean
+  last?: boolean
 }) {
-  // Interactive mode if no title provided
   if (!options.title) {
     console.log('\nCreate New Issue')
     console.log('-'.repeat(40))
@@ -192,7 +243,6 @@ async function createIssueCommand(options: {
     options.type = await prompt('Type (bug/improvement) [improvement]: ')
     options.labels = await prompt('Labels (comma-separated) []: ')
 
-    // Apply defaults
     if (!options.priority) options.priority = 'medium'
     if (!options.type) options.type = 'improvement'
   }
@@ -203,6 +253,14 @@ async function createIssueCommand(options: {
   }
 
   try {
+    const order = await resolvePosition({
+      before: options.before,
+      after: options.after,
+      first: options.first,
+      last: options.last,
+      requireIfOpenIssues: true,
+    })
+
     const input: CreateIssueInput = {
       title: options.title,
       description: options.description,
@@ -210,6 +268,7 @@ async function createIssueCommand(options: {
       scope: options.scope as 'small' | 'medium' | 'large' | undefined,
       type: options.type as 'bug' | 'improvement',
       labels: options.labels,
+      order,
     }
 
     const issue = await createIssue(input)
@@ -229,10 +288,25 @@ async function updateIssueCommand(
     scope?: string
     type?: string
     labels?: string
-    status?: string
+    before?: string
+    after?: string
+    first?: boolean
+    last?: boolean
   },
 ) {
   try {
+    let order: string | undefined
+    if (options.before || options.after || options.first || options.last) {
+      order = await resolvePosition({
+        before: options.before,
+        after: options.after,
+        first: options.first,
+        last: options.last,
+        requireIfOpenIssues: false,
+        excludeId: id,
+      })
+    }
+
     const issue = await updateIssue(id, {
       title: options.title,
       description: options.description,
@@ -240,7 +314,7 @@ async function updateIssueCommand(
       scope: options.scope as 'small' | 'medium' | 'large' | undefined,
       type: options.type as 'bug' | 'improvement' | undefined,
       labels: options.labels,
-      status: options.status as 'open' | 'closed' | undefined,
+      order,
     })
     console.log(`Updated issue: ${issue.filename}`)
   } catch (e) {
@@ -253,10 +327,61 @@ async function closeIssueCommand(id: string) {
   try {
     await closeIssue(id)
     console.log('Issue closed.')
+
+    const onCloseContent = await getOnCloseContent()
+    if (onCloseContent) {
+      console.log(`\n${onCloseContent.trim()}\n`)
+    }
   } catch (e) {
     console.error(e instanceof Error ? e.message : 'Failed to close issue')
     process.exit(1)
   }
+}
+
+async function reopenIssueCommand(
+  id: string,
+  options: {
+    before?: string
+    after?: string
+    first?: boolean
+    last?: boolean
+  },
+) {
+  try {
+    const order = await resolvePosition({
+      before: options.before,
+      after: options.after,
+      first: options.first,
+      last: options.last,
+      requireIfOpenIssues: true,
+      excludeId: id,
+    })
+
+    await reopenIssue(id, order)
+    console.log('Issue reopened.')
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : 'Failed to reopen issue')
+    process.exit(1)
+  }
+}
+
+async function nextIssueCommand() {
+  const issue = await getNextIssue()
+
+  if (!issue) {
+    console.log('No open issues.')
+    return
+  }
+
+  console.log(`\n  Next issue:`)
+  console.log(`  ${'-'.repeat(60)}`)
+  console.log(
+    `  #${issue.id}  ${prioritySymbol(issue.frontmatter.priority)} ${typeSymbol(issue.frontmatter.type)}  ${issue.frontmatter.title}`,
+  )
+  if (issue.frontmatter.description !== issue.frontmatter.title) {
+    console.log(`  ${issue.frontmatter.description}`)
+  }
+  console.log()
 }
 
 // Main
@@ -280,25 +405,32 @@ Options:
   --version, -v           Show version number
 
 Commands:
-  list                    List all open issues
+  list                    List all open issues (roadmap order)
     --all, -a             Include closed issues
     --priority, -p <p>    Filter by priority (high, medium, low)
     --scope <s>           Filter by scope (small, medium, large)
     --type, -t <t>        Filter by type (bug, improvement)
     --search, -s <q>      Fuzzy search issues
+    --sort <s>            Sort: roadmap (default), priority, created, updated, id
 
   search <query>          Fuzzy search issues
     --all, -a             Include closed issues
 
   read <id>               Read a specific issue
 
-  create                  Create a new issue (interactive)
+  next                    Show the next issue to work on
+
+  create                  Create a new issue
     --title, -t <t>       Issue title
     --description, -d <d> Short description
     --priority, -p <p>    Priority (high, medium, low)
     --scope <s>           Scope (small, medium, large)
     --type <t>            Type (bug, improvement)
     --labels, -l <l>      Comma-separated labels
+    --before <id>         Insert before this issue in roadmap
+    --after <id>          Insert after this issue in roadmap
+    --first               Insert at the beginning of the roadmap
+    --last                Insert at the end of the roadmap
 
   update <id>             Update an issue
     --title, -t <t>       New title
@@ -307,20 +439,30 @@ Commands:
     --scope <s>           New scope
     --type <t>            New type
     --labels, -l <l>      New labels
-    --status, -s <s>      New status (open, closed)
+    --before <id>         Move before this issue in roadmap
+    --after <id>          Move after this issue in roadmap
+    --first               Move to the beginning of the roadmap
+    --last                Move to the end of the roadmap
 
   close <id>              Close an issue
+
+  reopen <id>             Reopen a closed issue
+    --before <id>         Insert before this issue in roadmap
+    --after <id>          Insert after this issue in roadmap
+    --first               Insert at the beginning of the roadmap
+    --last                Insert at the end of the roadmap
 
 Examples:
   issy list
   issy list --priority high --type bug
-  issy list --scope large
-  issy search "dashboard"
-  issy search "k8s" --all
+  issy next
   issy read 0001
-  issy create --title "Fix login bug" --type bug --priority high --scope small
-  issy update 0001 --priority low --scope medium
+  issy create --title "Fix login bug" --type bug --priority high --after 0002
+  issy create --title "Add dark mode" --last
+  issy create --title "Urgent fix" --first
+  issy update 0001 --priority low --after 0003
   issy close 0001
+  issy reopen 0001 --last
 `)
     return
   }
@@ -335,6 +477,7 @@ Examples:
           scope: { type: 'string' },
           type: { type: 'string', short: 't' },
           search: { type: 'string', short: 's' },
+          sort: { type: 'string' },
         },
         allowPositionals: true,
       })
@@ -369,6 +512,11 @@ Examples:
       break
     }
 
+    case 'next': {
+      await nextIssueCommand()
+      break
+    }
+
     case 'create': {
       const { values } = parseArgs({
         args: args.slice(1),
@@ -379,6 +527,10 @@ Examples:
           scope: { type: 'string' },
           type: { type: 'string' },
           labels: { type: 'string', short: 'l' },
+          before: { type: 'string' },
+          after: { type: 'string' },
+          first: { type: 'boolean' },
+          last: { type: 'boolean' },
         },
         allowPositionals: true,
       })
@@ -401,7 +553,10 @@ Examples:
           scope: { type: 'string' },
           type: { type: 'string' },
           labels: { type: 'string', short: 'l' },
-          status: { type: 'string', short: 's' },
+          before: { type: 'string' },
+          after: { type: 'string' },
+          first: { type: 'boolean' },
+          last: { type: 'boolean' },
         },
         allowPositionals: true,
       })
@@ -419,6 +574,26 @@ Examples:
       break
     }
 
+    case 'reopen': {
+      const id = args[1]
+      if (!id) {
+        console.error('Usage: issy reopen <id>')
+        process.exit(1)
+      }
+      const { values } = parseArgs({
+        args: args.slice(2),
+        options: {
+          before: { type: 'string' },
+          after: { type: 'string' },
+          first: { type: 'boolean' },
+          last: { type: 'boolean' },
+        },
+        allowPositionals: true,
+      })
+      await reopenIssueCommand(id, values)
+      break
+    }
+
     default:
       console.error(`Unknown command: ${command}`)
       console.log('Run "issy help" for usage.')
@@ -426,7 +601,6 @@ Examples:
   }
 }
 
-// Export the promise so bin/issy can await it before exiting
 export const ready = main().catch((err) => {
   console.error(err)
   process.exit(1)

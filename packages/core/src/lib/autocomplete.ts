@@ -37,7 +37,7 @@ const QUALIFIER_VALUES: Record<string, readonly string[]> = {
   priority: ['high', 'medium', 'low'] as const,
   scope: ['small', 'medium', 'large'] as const,
   type: ['bug', 'improvement'] as const,
-  sort: ['priority', 'scope', 'created', 'updated', 'id'] as const,
+  sort: ['roadmap', 'priority', 'scope', 'created', 'updated', 'id'] as const,
   // label values are dynamic and provided via existingLabels parameter
 }
 
