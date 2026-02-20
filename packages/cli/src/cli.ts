@@ -450,6 +450,8 @@ Commands:
     --first               Insert at the beginning of the roadmap
     --last                Insert at the end of the roadmap
 
+  skill install            Install the issy skill for your AI coding assistant
+
 Examples:
   issy list
   issy list --priority high --type bug

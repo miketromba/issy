@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import {
   cpSync,
   existsSync,
@@ -60,6 +61,8 @@ if (args[0] === 'migrate') {
   migrate()
 } else if (args[0] === 'init') {
   init()
+} else if (args[0] === 'skill') {
+  skill()
 } else if (CLI_COMMANDS.has(args[0] || '')) {
   const dir = dirname(fileURLToPath(import.meta.url))
   const cli = await import(resolve(dir, 'cli.js'))
@@ -146,6 +149,27 @@ function migrate(): never {
     )
   }
   console.log(`   Removed ${legacy}`)
+  process.exit(0)
+}
+
+function skill(): never {
+  const subcommand = args[1]
+  if (subcommand !== 'install') {
+    console.log(`
+Usage: issy skill <command>
+
+Commands:
+  install    Install the issy skill for your AI coding assistant
+`)
+    process.exit(subcommand ? 1 : 0)
+  }
+
+  console.log('Installing issy skill via skills CLI...\n')
+  try {
+    execSync('npx skills add miketromba/issy', { stdio: 'inherit' })
+  } catch {
+    process.exit(1)
+  }
   process.exit(0)
 }
 

@@ -30,6 +30,12 @@ The assistant creates, searches, updates, and closes issues for you. Issues are 
 ## Install the Skill
 
 ```bash
+issy skill install
+```
+
+Or, if you haven't installed `issy` yet:
+
+```bash
 npx skills add miketromba/issy
 ```
 
@@ -124,6 +130,7 @@ issy create --title "Bug" --after 0002    # Create issue after #0002
 issy update 0001 --before 0003            # Reposition in roadmap
 issy close 0001               # Close issue
 issy reopen 0001 --after 0004 # Reopen and place in roadmap
+issy skill install            # Install the AI skill
 issy migrate                  # Migrate from .issues/ to .issy/
 issy --version                # Check version
 ```
