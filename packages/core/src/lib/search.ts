@@ -8,22 +8,22 @@ import type { Issue, IssueFilters } from './types'
 
 // Fuse.js configuration for fuzzy search
 const FUSE_OPTIONS: IFuseOptions<Issue> = {
-  keys: [
-    { name: 'frontmatter.title', weight: 1.0 },
-    { name: 'frontmatter.description', weight: 0.7 },
-    { name: 'frontmatter.labels', weight: 0.5 },
-    { name: 'content', weight: 0.3 },
-  ],
-  threshold: 0.4, // 0 = exact match, 1 = match anything
-  ignoreLocation: true, // search entire string, not just beginning
-  includeScore: true,
+	keys: [
+		{ name: 'frontmatter.title', weight: 1.0 },
+		{ name: 'frontmatter.description', weight: 0.7 },
+		{ name: 'frontmatter.labels', weight: 0.5 },
+		{ name: 'content', weight: 0.3 }
+	],
+	threshold: 0.4, // 0 = exact match, 1 = match anything
+	ignoreLocation: true, // search entire string, not just beginning
+	includeScore: true
 }
 
 /**
  * Create a Fuse.js instance for searching issues
  */
 export function createSearchIndex(issues: Issue[]): Fuse<Issue> {
-  return new Fuse(issues, FUSE_OPTIONS)
+	return new Fuse(issues, FUSE_OPTIONS)
 }
 
 /**
@@ -31,33 +31,36 @@ export function createSearchIndex(issues: Issue[]): Fuse<Issue> {
  * Returns issues sorted by relevance
  */
 export function searchIssues(fuse: Fuse<Issue>, query: string): Issue[] {
-  if (!query.trim()) {
-    return []
-  }
+	if (!query.trim()) {
+		return []
+	}
 
-  const results = fuse.search(query)
-  return results.map((r) => r.item)
+	const results = fuse.search(query)
+	return results.map(r => r.item)
 }
 
 /**
  * Filter issues by frontmatter fields
  */
 export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
-  return issues.filter((issue) => {
-    if (filters.status && issue.frontmatter.status !== filters.status) {
-      return false
-    }
-    if (filters.priority && issue.frontmatter.priority !== filters.priority) {
-      return false
-    }
-    if (filters.scope && issue.frontmatter.scope !== filters.scope) {
-      return false
-    }
-    if (filters.type && issue.frontmatter.type !== filters.type) {
-      return false
-    }
-    return true
-  })
+	return issues.filter(issue => {
+		if (filters.status && issue.frontmatter.status !== filters.status) {
+			return false
+		}
+		if (
+			filters.priority &&
+			issue.frontmatter.priority !== filters.priority
+		) {
+			return false
+		}
+		if (filters.scope && issue.frontmatter.scope !== filters.scope) {
+			return false
+		}
+		if (filters.type && issue.frontmatter.type !== filters.type) {
+			return false
+		}
+		return true
+	})
 }
 
 /**
@@ -66,58 +69,60 @@ export function filterIssues(issues: Issue[], filters: IssueFilters): Issue[] {
  * ID matches (exact prefix) are ranked first
  */
 export function filterAndSearchIssues(
-  issues: Issue[],
-  filters: IssueFilters,
+	issues: Issue[],
+	filters: IssueFilters
 ): Issue[] {
-  // First apply dropdown filters
-  let result = filterIssues(issues, filters)
+	// First apply dropdown filters
+	let result = filterIssues(issues, filters)
 
-  // Then apply fuzzy search if there's a search term
-  if (filters.search?.trim()) {
-    const query = filters.search.trim()
+	// Then apply fuzzy search if there's a search term
+	if (filters.search?.trim()) {
+		const query = filters.search.trim()
 
-    // Check for ID matches first (exact prefix match)
-    // Supports: "1" -> "0001", "01" -> "0001", "0001" -> "0001"
-    const idMatches: Issue[] = []
-    const nonIdMatches: Issue[] = []
+		// Check for ID matches first (exact prefix match)
+		// Supports: "1" -> "0001", "01" -> "0001", "0001" -> "0001"
+		const idMatches: Issue[] = []
+		const nonIdMatches: Issue[] = []
 
-    const normalizedQuery = query.replace(/^0+/, '') // Remove leading zeros
+		const normalizedQuery = query.replace(/^0+/, '') // Remove leading zeros
 
-    for (const issue of result) {
-      const normalizedId = issue.id.replace(/^0+/, '')
-      if (
-        normalizedId.startsWith(normalizedQuery) ||
-        issue.id.startsWith(query)
-      ) {
-        idMatches.push(issue)
-      }
-    }
+		for (const issue of result) {
+			const normalizedId = issue.id.replace(/^0+/, '')
+			if (
+				normalizedId.startsWith(normalizedQuery) ||
+				issue.id.startsWith(query)
+			) {
+				idMatches.push(issue)
+			}
+		}
 
-    // Now do fuzzy search
-    const fuse = createSearchIndex(issues)
-    const searchResults = fuse.search(query)
-    const matchedIds = new Set(searchResults.map((r) => r.item.id))
+		// Now do fuzzy search
+		const fuse = createSearchIndex(issues)
+		const searchResults = fuse.search(query)
+		const matchedIds = new Set(searchResults.map(r => r.item.id))
 
-    // Get fuzzy matches that aren't already ID matches
-    const idMatchSet = new Set(idMatches.map((i) => i.id))
-    for (const issue of result) {
-      if (!idMatchSet.has(issue.id) && matchedIds.has(issue.id)) {
-        nonIdMatches.push(issue)
-      }
-    }
+		// Get fuzzy matches that aren't already ID matches
+		const idMatchSet = new Set(idMatches.map(i => i.id))
+		for (const issue of result) {
+			if (!idMatchSet.has(issue.id) && matchedIds.has(issue.id)) {
+				nonIdMatches.push(issue)
+			}
+		}
 
-    // Sort fuzzy matches by relevance
-    nonIdMatches.sort((a, b) => {
-      const aScore = searchResults.find((r) => r.item.id === a.id)?.score ?? 1
-      const bScore = searchResults.find((r) => r.item.id === b.id)?.score ?? 1
-      return aScore - bScore // Lower score = better match
-    })
+		// Sort fuzzy matches by relevance
+		nonIdMatches.sort((a, b) => {
+			const aScore =
+				searchResults.find(r => r.item.id === a.id)?.score ?? 1
+			const bScore =
+				searchResults.find(r => r.item.id === b.id)?.score ?? 1
+			return aScore - bScore // Lower score = better match
+		})
 
-    // ID matches first, then fuzzy matches
-    result = [...idMatches, ...nonIdMatches]
-  }
+		// ID matches first, then fuzzy matches
+		result = [...idMatches, ...nonIdMatches]
+	}
 
-  return result
+	return result
 }
 
 /**
@@ -127,88 +132,88 @@ export function filterAndSearchIssues(
  * @param sortBy - Sort option: "roadmap", "priority", "scope", "created", "updated", or "id"
  */
 function sortIssues(issues: Issue[], sortBy: string): void {
-  const sortOption = sortBy.toLowerCase()
+	const sortOption = sortBy.toLowerCase()
 
-  if (sortOption === 'roadmap') {
-    issues.sort((a, b) => {
-      const orderA = a.frontmatter.order
-      const orderB = b.frontmatter.order
-      if (orderA && orderB)
-        return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
-      if (orderA && !orderB) return -1
-      if (!orderA && orderB) return 1
-      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
-    })
-  } else if (sortOption === 'priority') {
-    // Sort by priority (high → medium → low), then by ID (newest first)
-    const priorityOrder: Record<string, number> = {
-      high: 0,
-      medium: 1,
-      low: 2,
-    }
-    issues.sort((a, b) => {
-      const priorityA = priorityOrder[a.frontmatter.priority] ?? 999
-      const priorityB = priorityOrder[b.frontmatter.priority] ?? 999
-      if (priorityA !== priorityB) return priorityA - priorityB
-      return b.id.localeCompare(a.id) // newest first within priority
-    })
-  } else if (sortOption === 'scope') {
-    // Sort by scope (small → medium → large), then by ID (newest first)
-    // Issues without scope go to the end
-    const scopeOrder: Record<string, number> = {
-      small: 0,
-      medium: 1,
-      large: 2,
-    }
-    issues.sort((a, b) => {
-      const scopeA = a.frontmatter.scope
-        ? (scopeOrder[a.frontmatter.scope] ?? 99)
-        : 99
-      const scopeB = b.frontmatter.scope
-        ? (scopeOrder[b.frontmatter.scope] ?? 99)
-        : 99
-      if (scopeA !== scopeB) return scopeA - scopeB
-      return b.id.localeCompare(a.id) // newest first within scope
-    })
-  } else if (sortOption === 'created') {
-    // Sort by creation date (newest first)
-    issues.sort((a, b) => {
-      const dateA = a.frontmatter.created || ''
-      const dateB = b.frontmatter.created || ''
-      if (dateA !== dateB) return dateB.localeCompare(dateA) // newest first
-      return b.id.localeCompare(a.id) // fallback to ID
-    })
-  } else if (sortOption === 'created-asc') {
-    // Sort by creation date (oldest first)
-    issues.sort((a, b) => {
-      const dateA = a.frontmatter.created || ''
-      const dateB = b.frontmatter.created || ''
-      if (dateA !== dateB) return dateA.localeCompare(dateB) // oldest first
-      return a.id.localeCompare(b.id) // fallback to ID
-    })
-  } else if (sortOption === 'updated') {
-    // Sort by last updated date (most recent first), fallback to created if no updated
-    issues.sort((a, b) => {
-      const dateA = a.frontmatter.updated || a.frontmatter.created || ''
-      const dateB = b.frontmatter.updated || b.frontmatter.created || ''
-      if (dateA !== dateB) return dateB.localeCompare(dateA) // newest first
-      return b.id.localeCompare(a.id) // fallback to ID
-    })
-  } else if (sortOption === 'id') {
-    // Sort by issue ID (newest first)
-    issues.sort((a, b) => b.id.localeCompare(a.id))
-  } else {
-    // Invalid sort option - default to roadmap order
-    issues.sort((a, b) => {
-      const orderA = a.frontmatter.order
-      const orderB = b.frontmatter.order
-      if (orderA && orderB)
-        return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
-      if (orderA && !orderB) return -1
-      if (!orderA && orderB) return 1
-      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
-    })
-  }
+	if (sortOption === 'roadmap') {
+		issues.sort((a, b) => {
+			const orderA = a.frontmatter.order
+			const orderB = b.frontmatter.order
+			if (orderA && orderB)
+				return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
+			if (orderA && !orderB) return -1
+			if (!orderA && orderB) return 1
+			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+		})
+	} else if (sortOption === 'priority') {
+		// Sort by priority (high → medium → low), then by ID (newest first)
+		const priorityOrder: Record<string, number> = {
+			high: 0,
+			medium: 1,
+			low: 2
+		}
+		issues.sort((a, b) => {
+			const priorityA = priorityOrder[a.frontmatter.priority] ?? 999
+			const priorityB = priorityOrder[b.frontmatter.priority] ?? 999
+			if (priorityA !== priorityB) return priorityA - priorityB
+			return b.id.localeCompare(a.id) // newest first within priority
+		})
+	} else if (sortOption === 'scope') {
+		// Sort by scope (small → medium → large), then by ID (newest first)
+		// Issues without scope go to the end
+		const scopeOrder: Record<string, number> = {
+			small: 0,
+			medium: 1,
+			large: 2
+		}
+		issues.sort((a, b) => {
+			const scopeA = a.frontmatter.scope
+				? (scopeOrder[a.frontmatter.scope] ?? 99)
+				: 99
+			const scopeB = b.frontmatter.scope
+				? (scopeOrder[b.frontmatter.scope] ?? 99)
+				: 99
+			if (scopeA !== scopeB) return scopeA - scopeB
+			return b.id.localeCompare(a.id) // newest first within scope
+		})
+	} else if (sortOption === 'created') {
+		// Sort by creation date (newest first)
+		issues.sort((a, b) => {
+			const dateA = a.frontmatter.created || ''
+			const dateB = b.frontmatter.created || ''
+			if (dateA !== dateB) return dateB.localeCompare(dateA) // newest first
+			return b.id.localeCompare(a.id) // fallback to ID
+		})
+	} else if (sortOption === 'created-asc') {
+		// Sort by creation date (oldest first)
+		issues.sort((a, b) => {
+			const dateA = a.frontmatter.created || ''
+			const dateB = b.frontmatter.created || ''
+			if (dateA !== dateB) return dateA.localeCompare(dateB) // oldest first
+			return a.id.localeCompare(b.id) // fallback to ID
+		})
+	} else if (sortOption === 'updated') {
+		// Sort by last updated date (most recent first), fallback to created if no updated
+		issues.sort((a, b) => {
+			const dateA = a.frontmatter.updated || a.frontmatter.created || ''
+			const dateB = b.frontmatter.updated || b.frontmatter.created || ''
+			if (dateA !== dateB) return dateB.localeCompare(dateA) // newest first
+			return b.id.localeCompare(a.id) // fallback to ID
+		})
+	} else if (sortOption === 'id') {
+		// Sort by issue ID (newest first)
+		issues.sort((a, b) => b.id.localeCompare(a.id))
+	} else {
+		// Invalid sort option - default to roadmap order
+		issues.sort((a, b) => {
+			const orderA = a.frontmatter.order
+			const orderB = b.frontmatter.order
+			if (orderA && orderB)
+				return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
+			if (orderA && !orderB) return -1
+			if (!orderA && orderB) return 1
+			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+		})
+	}
 }
 
 /**
@@ -259,129 +264,131 @@ function sortIssues(issues: Issue[], sortBy: string): void {
  * // Returns open issues matching "dashboard" via fuzzy search, sorted by relevance
  */
 export function filterByQuery(issues: Issue[], query: string): Issue[] {
-  const parsed = parseQuery(query)
+	const parsed = parseQuery(query)
 
-  // First, filter by qualifiers
-  let result = issues.filter((issue) => {
-    // is: qualifier (maps to status)
-    if (parsed.qualifiers.is) {
-      const statusValue = parsed.qualifiers.is.toLowerCase()
-      // Only filter if value is valid (open or closed)
-      if (statusValue === 'open' || statusValue === 'closed') {
-        if (issue.frontmatter.status !== statusValue) {
-          return false
-        }
-      }
-      // Invalid values are ignored (issue passes filter)
-    }
+	// First, filter by qualifiers
+	let result = issues.filter(issue => {
+		// is: qualifier (maps to status)
+		if (parsed.qualifiers.is) {
+			const statusValue = parsed.qualifiers.is.toLowerCase()
+			// Only filter if value is valid (open or closed)
+			if (statusValue === 'open' || statusValue === 'closed') {
+				if (issue.frontmatter.status !== statusValue) {
+					return false
+				}
+			}
+			// Invalid values are ignored (issue passes filter)
+		}
 
-    // priority: qualifier
-    if (parsed.qualifiers.priority) {
-      const priorityValue = parsed.qualifiers.priority.toLowerCase()
-      // Only filter if value is valid (high, medium, or low)
-      if (
-        priorityValue === 'high' ||
-        priorityValue === 'medium' ||
-        priorityValue === 'low'
-      ) {
-        if (issue.frontmatter.priority !== priorityValue) {
-          return false
-        }
-      }
-      // Invalid values are ignored (issue passes filter)
-    }
+		// priority: qualifier
+		if (parsed.qualifiers.priority) {
+			const priorityValue = parsed.qualifiers.priority.toLowerCase()
+			// Only filter if value is valid (high, medium, or low)
+			if (
+				priorityValue === 'high' ||
+				priorityValue === 'medium' ||
+				priorityValue === 'low'
+			) {
+				if (issue.frontmatter.priority !== priorityValue) {
+					return false
+				}
+			}
+			// Invalid values are ignored (issue passes filter)
+		}
 
-    // scope: qualifier
-    if (parsed.qualifiers.scope) {
-      const scopeValue = parsed.qualifiers.scope.toLowerCase()
-      // Only filter if value is valid (small, medium, or large)
-      if (
-        scopeValue === 'small' ||
-        scopeValue === 'medium' ||
-        scopeValue === 'large'
-      ) {
-        if (issue.frontmatter.scope !== scopeValue) {
-          return false
-        }
-      }
-      // Invalid values are ignored (issue passes filter)
-    }
+		// scope: qualifier
+		if (parsed.qualifiers.scope) {
+			const scopeValue = parsed.qualifiers.scope.toLowerCase()
+			// Only filter if value is valid (small, medium, or large)
+			if (
+				scopeValue === 'small' ||
+				scopeValue === 'medium' ||
+				scopeValue === 'large'
+			) {
+				if (issue.frontmatter.scope !== scopeValue) {
+					return false
+				}
+			}
+			// Invalid values are ignored (issue passes filter)
+		}
 
-    // type: qualifier
-    if (parsed.qualifiers.type) {
-      const typeValue = parsed.qualifiers.type.toLowerCase()
-      // Only filter if value is valid (bug or improvement)
-      if (typeValue === 'bug' || typeValue === 'improvement') {
-        if (issue.frontmatter.type !== typeValue) {
-          return false
-        }
-      }
-      // Invalid values are ignored (issue passes filter)
-    }
+		// type: qualifier
+		if (parsed.qualifiers.type) {
+			const typeValue = parsed.qualifiers.type.toLowerCase()
+			// Only filter if value is valid (bug or improvement)
+			if (typeValue === 'bug' || typeValue === 'improvement') {
+				if (issue.frontmatter.type !== typeValue) {
+					return false
+				}
+			}
+			// Invalid values are ignored (issue passes filter)
+		}
 
-    // label: qualifier
-    if (parsed.qualifiers.label) {
-      const labelQuery = parsed.qualifiers.label.toLowerCase()
-      const issueLabels = (issue.frontmatter.labels || '').toLowerCase()
-      // Check if the label query appears in the issue's labels (partial match)
-      if (!issueLabels.includes(labelQuery)) {
-        return false
-      }
-    }
+		// label: qualifier
+		if (parsed.qualifiers.label) {
+			const labelQuery = parsed.qualifiers.label.toLowerCase()
+			const issueLabels = (issue.frontmatter.labels || '').toLowerCase()
+			// Check if the label query appears in the issue's labels (partial match)
+			if (!issueLabels.includes(labelQuery)) {
+				return false
+			}
+		}
 
-    return true
-  })
+		return true
+	})
 
-  // Apply sorting if no search text (search text uses relevance sorting)
-  if (!parsed.searchText.trim()) {
-    const sortBy = parsed.qualifiers.sort?.toLowerCase() || 'roadmap'
-    sortIssues(result, sortBy)
-  }
+	// Apply sorting if no search text (search text uses relevance sorting)
+	if (!parsed.searchText.trim()) {
+		const sortBy = parsed.qualifiers.sort?.toLowerCase() || 'roadmap'
+		sortIssues(result, sortBy)
+	}
 
-  // If there's search text, apply fuzzy search
-  if (parsed.searchText.trim()) {
-    const searchQuery = parsed.searchText.trim()
+	// If there's search text, apply fuzzy search
+	if (parsed.searchText.trim()) {
+		const searchQuery = parsed.searchText.trim()
 
-    // Check for ID matches first (exact prefix match)
-    // Supports: "1" -> "0001", "01" -> "0001", "0001" -> "0001"
-    const idMatches: Issue[] = []
-    const nonIdMatches: Issue[] = []
+		// Check for ID matches first (exact prefix match)
+		// Supports: "1" -> "0001", "01" -> "0001", "0001" -> "0001"
+		const idMatches: Issue[] = []
+		const nonIdMatches: Issue[] = []
 
-    const normalizedQuery = searchQuery.replace(/^0+/, '') // Remove leading zeros
+		const normalizedQuery = searchQuery.replace(/^0+/, '') // Remove leading zeros
 
-    for (const issue of result) {
-      const normalizedId = issue.id.replace(/^0+/, '')
-      if (
-        normalizedId.startsWith(normalizedQuery) ||
-        issue.id.startsWith(searchQuery)
-      ) {
-        idMatches.push(issue)
-      }
-    }
+		for (const issue of result) {
+			const normalizedId = issue.id.replace(/^0+/, '')
+			if (
+				normalizedId.startsWith(normalizedQuery) ||
+				issue.id.startsWith(searchQuery)
+			) {
+				idMatches.push(issue)
+			}
+		}
 
-    // Now do fuzzy search on the filtered results
-    const fuse = createSearchIndex(result)
-    const searchResults = fuse.search(searchQuery)
-    const matchedIds = new Set(searchResults.map((r) => r.item.id))
+		// Now do fuzzy search on the filtered results
+		const fuse = createSearchIndex(result)
+		const searchResults = fuse.search(searchQuery)
+		const matchedIds = new Set(searchResults.map(r => r.item.id))
 
-    // Get fuzzy matches that aren't already ID matches
-    const idMatchSet = new Set(idMatches.map((i) => i.id))
-    for (const issue of result) {
-      if (!idMatchSet.has(issue.id) && matchedIds.has(issue.id)) {
-        nonIdMatches.push(issue)
-      }
-    }
+		// Get fuzzy matches that aren't already ID matches
+		const idMatchSet = new Set(idMatches.map(i => i.id))
+		for (const issue of result) {
+			if (!idMatchSet.has(issue.id) && matchedIds.has(issue.id)) {
+				nonIdMatches.push(issue)
+			}
+		}
 
-    // Sort fuzzy matches by relevance
-    nonIdMatches.sort((a, b) => {
-      const aScore = searchResults.find((r) => r.item.id === a.id)?.score ?? 1
-      const bScore = searchResults.find((r) => r.item.id === b.id)?.score ?? 1
-      return aScore - bScore // Lower score = better match
-    })
+		// Sort fuzzy matches by relevance
+		nonIdMatches.sort((a, b) => {
+			const aScore =
+				searchResults.find(r => r.item.id === a.id)?.score ?? 1
+			const bScore =
+				searchResults.find(r => r.item.id === b.id)?.score ?? 1
+			return aScore - bScore // Lower score = better match
+		})
 
-    // ID matches first, then fuzzy matches
-    result = [...idMatches, ...nonIdMatches]
-  }
+		// ID matches first, then fuzzy matches
+		result = [...idMatches, ...nonIdMatches]
+	}
 
-  return result
+	return result
 }

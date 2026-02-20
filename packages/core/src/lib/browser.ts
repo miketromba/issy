@@ -15,9 +15,9 @@ export { filterByQuery, filterIssues } from './search'
 
 // Types
 export type {
-  CreateIssueInput,
-  Issue,
-  IssueFilters,
-  IssueFrontmatter,
-  UpdateIssueInput,
+	CreateIssueInput,
+	Issue,
+	IssueFilters,
+	IssueFrontmatter,
+	UpdateIssueInput
 } from './types'

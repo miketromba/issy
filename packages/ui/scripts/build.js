@@ -23,7 +23,7 @@ console.log('Building server...')
 const serverBuild = await Bun.build({
 	entrypoints: [join(srcDir, 'server.ts')],
 	target: 'node',
-	format: 'esm',
+	format: 'esm'
 })
 
 // Write server bundle
@@ -38,7 +38,7 @@ const frontendBuild = await Bun.build({
 	entrypoints: [join(srcDir, 'frontend.tsx')],
 	target: 'browser',
 	format: 'esm',
-	minify: true,
+	minify: true
 })
 
 // Write frontend bundle - filter for JS output only

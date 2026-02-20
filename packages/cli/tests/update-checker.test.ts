@@ -3,55 +3,71 @@ import {
 	detectPackageManager,
 	detectPackageManagerFromPath,
 	isGlobalInstall,
-	getUpdateCommand,
+	getUpdateCommand
 } from '../src/update-checker'
 
 describe('detectPackageManagerFromPath', () => {
 	it('detects bun from ~/.bun/ path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.bun/install/global/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.bun/install/global/node_modules/issy/bin/issy'
+			)
 		).toBe('bun')
 	})
 
 	it('detects pnpm from /pnpm/ path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.local/share/pnpm/global/5/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.local/share/pnpm/global/5/node_modules/issy/bin/issy'
+			)
 		).toBe('pnpm')
 	})
 
 	it('detects pnpm from /.pnpm path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.pnpm-global/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.pnpm-global/node_modules/issy/bin/issy'
+			)
 		).toBe('pnpm')
 	})
 
 	it('detects yarn from ~/.yarn/ path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.yarn/global/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.yarn/global/node_modules/issy/bin/issy'
+			)
 		).toBe('yarn')
 	})
 
 	it('detects yarn from yarn/global path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.config/yarn/global/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.config/yarn/global/node_modules/issy/bin/issy'
+			)
 		).toBe('yarn')
 	})
 
 	it('detects npm from ~/.nvm/ path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.nvm/versions/node/v20/lib/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.nvm/versions/node/v20/lib/node_modules/issy/bin/issy'
+			)
 		).toBe('npm')
 	})
 
 	it('detects npm from /usr/local/lib/node_modules path', () => {
 		expect(
-			detectPackageManagerFromPath('/usr/local/lib/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/usr/local/lib/node_modules/issy/bin/issy'
+			)
 		).toBe('npm')
 	})
 
 	it('detects npm from ~/.npm-global/ path', () => {
 		expect(
-			detectPackageManagerFromPath('/Users/test/.npm-global/lib/node_modules/issy/bin/issy'),
+			detectPackageManagerFromPath(
+				'/Users/test/.npm-global/lib/node_modules/issy/bin/issy'
+			)
 		).toBe('npm')
 	})
 
@@ -64,13 +80,21 @@ describe('detectPackageManager', () => {
 	describe('from script path (priority 1)', () => {
 		it('detects bun from path even without env vars', () => {
 			expect(
-				detectPackageManager('/Users/test/.bun/install/global/node_modules/issy/bin/issy', {}, '/tmp'),
+				detectPackageManager(
+					'/Users/test/.bun/install/global/node_modules/issy/bin/issy',
+					{},
+					'/tmp'
+				)
 			).toBe('bun')
 		})
 
 		it('detects pnpm from path even without env vars', () => {
 			expect(
-				detectPackageManager('/Users/test/.local/share/pnpm/global/node_modules/issy/bin/issy', {}, '/tmp'),
+				detectPackageManager(
+					'/Users/test/.local/share/pnpm/global/node_modules/issy/bin/issy',
+					{},
+					'/tmp'
+				)
 			).toBe('pnpm')
 		})
 
@@ -78,36 +102,58 @@ describe('detectPackageManager', () => {
 			// Script is in bun path but user agent says npm - path wins
 			const env = { npm_config_user_agent: 'npm/10.2.0 node/v20.9.0' }
 			expect(
-				detectPackageManager('/Users/test/.bun/install/global/node_modules/issy/bin/issy', env, '/tmp'),
+				detectPackageManager(
+					'/Users/test/.bun/install/global/node_modules/issy/bin/issy',
+					env,
+					'/tmp'
+				)
 			).toBe('bun')
 		})
 	})
 
 	describe('from npm_config_user_agent (priority 2)', () => {
 		it('detects npm when path is unknown', () => {
-			const env = { npm_config_user_agent: 'npm/10.2.0 node/v20.9.0 darwin arm64' }
-			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe('npm')
+			const env = {
+				npm_config_user_agent: 'npm/10.2.0 node/v20.9.0 darwin arm64'
+			}
+			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe(
+				'npm'
+			)
 		})
 
 		it('detects yarn when path is unknown', () => {
-			const env = { npm_config_user_agent: 'yarn/1.22.19 npm/? node/v20.9.0 darwin arm64' }
-			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe('yarn')
+			const env = {
+				npm_config_user_agent:
+					'yarn/1.22.19 npm/? node/v20.9.0 darwin arm64'
+			}
+			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe(
+				'yarn'
+			)
 		})
 
 		it('detects pnpm when path is unknown', () => {
-			const env = { npm_config_user_agent: 'pnpm/8.10.0 npm/? node/v20.9.0 darwin arm64' }
-			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe('pnpm')
+			const env = {
+				npm_config_user_agent:
+					'pnpm/8.10.0 npm/? node/v20.9.0 darwin arm64'
+			}
+			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe(
+				'pnpm'
+			)
 		})
 
 		it('detects bun when path is unknown', () => {
 			const env = { npm_config_user_agent: 'bun/1.0.0' }
-			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe('bun')
+			expect(detectPackageManager('/unknown/path', env, '/tmp')).toBe(
+				'bun'
+			)
 		})
 	})
 
 	describe('fallback behavior', () => {
 		it('defaults to npm when no indicators present', () => {
-			expect(detectPackageManager('/unknown/path', {}, '/tmp/nonexistent')).toBe('npm')
+			expect(
+				detectPackageManager('/unknown/path', {}, '/tmp/nonexistent')
+			).toBe('npm')
 		})
 
 		it('works without scriptPath argument', () => {
@@ -125,17 +171,29 @@ describe('isGlobalInstall', () => {
 
 	it('returns true for /usr/local/lib/node_modules path', () => {
 		const env = { HOME: '/Users/test' }
-		expect(isGlobalInstall('/usr/local/lib/node_modules/issy/bin/issy', env)).toBe(true)
+		expect(
+			isGlobalInstall('/usr/local/lib/node_modules/issy/bin/issy', env)
+		).toBe(true)
 	})
 
 	it('returns true for ~/.bun/install/global path', () => {
 		const env = { HOME: '/Users/test' }
-		expect(isGlobalInstall('/Users/test/.bun/install/global/node_modules/issy/bin/issy', env)).toBe(true)
+		expect(
+			isGlobalInstall(
+				'/Users/test/.bun/install/global/node_modules/issy/bin/issy',
+				env
+			)
+		).toBe(true)
 	})
 
 	it('returns true for ~/.nvm path', () => {
 		const env = { HOME: '/Users/test' }
-		expect(isGlobalInstall('/Users/test/.nvm/versions/node/v20/lib/node_modules/issy/bin/issy', env)).toBe(true)
+		expect(
+			isGlobalInstall(
+				'/Users/test/.nvm/versions/node/v20/lib/node_modules/issy/bin/issy',
+				env
+			)
+		).toBe(true)
 	})
 
 	it('returns true when running via npx', () => {
@@ -149,7 +207,10 @@ describe('isGlobalInstall', () => {
 	})
 
 	it('returns true when npm_execpath contains npx', () => {
-		const env = { HOME: '/Users/test', npm_execpath: '/usr/local/lib/node_modules/npm/bin/npx-cli.js' }
+		const env = {
+			HOME: '/Users/test',
+			npm_execpath: '/usr/local/lib/node_modules/npm/bin/npx-cli.js'
+		}
 		expect(isGlobalInstall('/some/cache/path', env)).toBe(true)
 	})
 
