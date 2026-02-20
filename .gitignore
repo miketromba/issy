@@ -13,3 +13,4 @@ dist/
 .cache/
 .turbo/
 packages/ui/src/dev-styles.css
+packages/cli/README.md

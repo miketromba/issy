@@ -1,6 +1,6 @@
 {
   "name": "issy",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "AI-native issue tracking. Markdown files in .issues/, managed by your coding assistant.",
   "type": "module",
   "license": "MIT",
@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "bun build src/main.ts src/cli.ts src/update-checker.ts --outdir dist --target node --format esm --external @miketromba/issy-app",
-    "prepublishOnly": "bun run build",
+    "prepublishOnly": "cp ../../README.md . && bun run build",
     "cli": "bun src/cli.ts",
     "test": "bun test",
     "lint": "biome check src bin"
