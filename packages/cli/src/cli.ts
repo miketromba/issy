@@ -110,6 +110,10 @@ async function resolvePosition(opts: {
 	)
 }
 
+function hasHelpFlag(commandArgs: string[]): boolean {
+	return commandArgs.includes('--help') || commandArgs.includes('-h')
+}
+
 // --- Commands ---
 
 async function listIssues(options: {
@@ -220,35 +224,7 @@ async function createIssueCommand(options: {
 	last?: boolean
 }) {
 	if (!options.title) {
-		console.log('\nCreate New Issue')
-		console.log('-'.repeat(40))
-
-		const prompt = (question: string): Promise<string> => {
-			process.stdout.write(question)
-			return new Promise(resolve => {
-				let input = ''
-				process.stdin.setRawMode?.(false)
-				process.stdin.resume()
-				process.stdin.setEncoding('utf8')
-				process.stdin.once('data', data => {
-					input = data.toString().trim()
-					resolve(input)
-				})
-			})
-		}
-
-		options.title = await prompt('Title: ')
-		options.priority = await prompt('Priority (high/medium/low) [medium]: ')
-		options.scope = await prompt('Scope (small/medium/large) []: ')
-		options.type = await prompt('Type (bug/improvement) [improvement]: ')
-		options.labels = await prompt('Labels (comma-separated) []: ')
-
-		if (!options.priority) options.priority = 'medium'
-		if (!options.type) options.type = 'improvement'
-	}
-
-	if (!options.title) {
-		console.error('Title is required')
+		console.error('Title is required. Use --title or -t to specify.')
 		process.exit(1)
 	}
 
@@ -468,6 +444,21 @@ Examples:
 
 	switch (command) {
 		case 'list': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy list [options]
+
+List all open issues in roadmap order.
+
+Options:
+  --all, -a             Include closed issues
+  --priority, -p <p>    Filter by priority (high, medium, low)
+  --scope <s>           Filter by scope (small, medium, large)
+  --type, -t <t>        Filter by type (bug, improvement)
+  --search, -s <q>      Fuzzy search issues
+  --sort <s>            Sort: roadmap (default), priority, created, updated, id
+`)
+				return
+			}
 			const { values } = parseArgs({
 				args: args.slice(1),
 				options: {
@@ -485,6 +476,16 @@ Examples:
 		}
 
 		case 'search': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy search <query> [options]
+
+Fuzzy search issues by title and content.
+
+Options:
+  --all, -a             Include closed issues (default: open only)
+`)
+				return
+			}
 			const query = args[1]
 			if (!query) {
 				console.error('Usage: issy search <query>')
@@ -502,6 +503,13 @@ Examples:
 		}
 
 		case 'read': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy read <id>
+
+Display a specific issue and all its details.
+`)
+				return
+			}
 			const id = args[1]
 			if (!id) {
 				console.error('Usage: issy read <id>')
@@ -512,11 +520,41 @@ Examples:
 		}
 
 		case 'next': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy next
+
+Show the next issue to work on (first open issue in roadmap order).
+`)
+				return
+			}
 			await nextIssueCommand()
 			break
 		}
 
 		case 'create': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy create [options]
+
+Create a new issue. --title is required.
+
+Options:
+  --title, -t <t>       Issue title
+  --body, -b <b>        Markdown body content
+  --priority, -p <p>    Priority: high, medium, low (default: medium)
+  --scope <s>           Scope: small, medium, large
+  --type <t>            Type: bug, improvement (default: improvement)
+  --labels, -l <l>      Comma-separated labels
+  --before <id>         Insert before this issue in roadmap
+  --after <id>          Insert after this issue in roadmap
+  --first               Insert at the beginning of the roadmap
+  --last                Insert at the end of the roadmap
+
+Examples:
+  issy create --title "Fix login bug" --type bug --priority high --after 0002
+  issy create --title "Add dark mode" --last
+`)
+				return
+			}
 			const { values } = parseArgs({
 				args: args.slice(1),
 				options: {
@@ -538,6 +576,29 @@ Examples:
 		}
 
 		case 'update': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy update <id> [options]
+
+Update an existing issue.
+
+Options:
+  --title, -t <t>       New title
+  --body, -b <b>        New markdown body content
+  --priority, -p <p>    New priority: high, medium, low
+  --scope <s>           New scope: small, medium, large
+  --type <t>            New type: bug, improvement
+  --labels, -l <l>      New labels (comma-separated)
+  --before <id>         Move before this issue in roadmap
+  --after <id>          Move after this issue in roadmap
+  --first               Move to the beginning of the roadmap
+  --last                Move to the end of the roadmap
+
+Examples:
+  issy update 0001 --priority low --after 0003
+  issy update 0002 --title "Renamed issue" --first
+`)
+				return
+			}
 			const id = args[1]
 			if (!id) {
 				console.error('Usage: issy update <id> [options]')
@@ -564,6 +625,13 @@ Examples:
 		}
 
 		case 'close': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy close <id>
+
+Close an issue by ID.
+`)
+				return
+			}
 			const id = args[1]
 			if (!id) {
 				console.error('Usage: issy close <id>')
@@ -574,6 +642,23 @@ Examples:
 		}
 
 		case 'reopen': {
+			if (hasHelpFlag(args.slice(1))) {
+				console.log(`Usage: issy reopen <id> [options]
+
+Reopen a closed issue.
+
+Options:
+  --before <id>         Insert before this issue in roadmap
+  --after <id>          Insert after this issue in roadmap
+  --first               Insert at the beginning of the roadmap
+  --last                Insert at the end of the roadmap
+
+Examples:
+  issy reopen 0001 --last
+  issy reopen 0001 --before 0003
+`)
+				return
+			}
 			const id = args[1]
 			if (!id) {
 				console.error('Usage: issy reopen <id>')
