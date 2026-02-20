@@ -1,6 +1,6 @@
 {
   "name": "issy",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "AI-native issue tracking. Markdown files in .issues/, managed by your coding assistant.",
   "type": "module",
   "license": "MIT",
