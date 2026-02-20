@@ -1,12 +1,13 @@
-# Agent Instructions
+## Shipping
 
-## Publishing
+When the user says "ship", that means: **push to remote AND publish to npm**. Do both.
 
-**Always bump versions before `bun run publish:all`** — npm rejects duplicate versions.
-
-Follow semver when bumping versions:
+1. Bump `version` in all three package.json files. Follow semver when bumping versions:
 - **Patch** (0.0.x): Bug fixes, minor tweaks, no API changes
 - **Minor** (0.x.0): New features, backward-compatible additions
 - **Major** (x.0.0): Breaking changes, incompatible API modifications
+2. Stage & commit
+3. `git tag vX.Y.Z`
+4. `git push && git push --tags`
 
-Update all three package.json files (core, ui, cli) with matching versions and dependency refs.
+The `v*` tag triggers `.github/workflows/publish.yml` which lints, builds, tests, publishes all three packages to npm with provenance, and creates a GitHub Release.
