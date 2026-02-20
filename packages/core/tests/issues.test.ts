@@ -124,4 +124,45 @@ describe('Issue CRUD', () => {
 	test('deleteIssue throws for non-existent issue', async () => {
 		await expect(deleteIssue('9999')).rejects.toThrow('Issue not found')
 	})
+
+	test('createIssue with body sets markdown content', async () => {
+		const issue = await createIssue({
+			title: 'With body',
+			body: '## Steps\n\n1. Do the thing\n2. See the result'
+		})
+
+		expect(issue.content).toContain('## Steps')
+		expect(issue.content).toContain('1. Do the thing')
+	})
+
+	test('createIssue without body uses default template', async () => {
+		const issue = await createIssue({ title: 'No body' })
+
+		expect(issue.content).toContain('## Details')
+	})
+
+	test('updateIssue with body replaces content', async () => {
+		await createIssue({
+			title: 'Original',
+			body: 'Old content here'
+		})
+
+		const updated = await updateIssue('0001', {
+			body: 'New content here'
+		})
+
+		expect(updated.content).toContain('New content here')
+		expect(updated.content).not.toContain('Old content here')
+	})
+
+	test('updateIssue without body preserves existing content', async () => {
+		await createIssue({
+			title: 'Keep body',
+			body: 'Should stay'
+		})
+
+		const updated = await updateIssue('0001', { title: 'Renamed' })
+
+		expect(updated.content).toContain('Should stay')
+	})
 })
