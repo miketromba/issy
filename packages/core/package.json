@@ -1,6 +1,6 @@
 {
   "name": "@miketromba/issy-core",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "description": "Issue storage, search, and parsing for issy",
   "type": "module",
   "license": "MIT",

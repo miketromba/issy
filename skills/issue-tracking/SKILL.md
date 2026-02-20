@@ -114,12 +114,14 @@ issy next
 issy create --title "Fix login bug" --type bug --priority high --after 0002
 issy create --title "Add dark mode" --type improvement --last --labels "ui, frontend"
 issy create --title "Urgent fix" --first
+issy create --title "Fix crash" --body "## Problem\n\nApp crashes on startup." --last
 
 # Update issue (position flags to reposition in roadmap)
 issy update <id> --priority low
 issy update <id> --after 0003
 issy update <id> --first
 issy update <id> --labels "api, backend"
+issy update <id> --body "## Problem\n\nUpdated description of the issue."
 
 # Close issue
 issy close <id>
@@ -162,6 +164,7 @@ Keep it brief—just capture what someone revisiting this issue would want to kn
 |----------|----------|--------|
 | title | Yes | string |
 | description | Yes | string (one-line summary) |
+| body | No | markdown content (the issue body after frontmatter) |
 | priority | Yes | `high`, `medium`, `low` |
 | scope | No | `small`, `medium`, `large` |
 | type | Yes | `bug`, `improvement` |

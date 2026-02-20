@@ -78,7 +78,7 @@ Once installed globally, you can run commands from your terminal:
 issy                          # Start the web UI
 issy list                     # List open issues (roadmap order)
 issy next                     # Show next issue to work on
-issy create --title "Bug"     # Create issue
+issy create --title "Bug"     # Create an issue
 ```
 
 ### Repository installation
@@ -127,7 +127,9 @@ issy next                     # Show next issue to work on
 issy search "auth"            # Fuzzy search
 issy read 0001                # View issue
 issy create --title "Bug" --after 0002    # Create issue after #0002
+issy create --title "Bug" --body "Details here" --last  # Create with body content
 issy update 0001 --before 0003            # Reposition in roadmap
+issy update 0001 --body "New details"     # Replace body content
 issy close 0001               # Close issue
 issy reopen 0001 --after 0004 # Reopen and place in roadmap
 issy skill install            # Install the AI skill

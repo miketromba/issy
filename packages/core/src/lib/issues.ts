@@ -439,13 +439,9 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
 		created: formatDate()
 	}
 
-	const content = `${generateFrontmatter(frontmatter)}
-
-## Details
-
-<!-- Add detailed description here -->
-
-`
+	const body =
+		input.body ?? '\n## Details\n\n<!-- Add detailed description here -->\n'
+	const content = `${generateFrontmatter(frontmatter)}\n${body}\n`
 
 	await writeFile(join(getIssuesDir(), filename), content)
 
@@ -453,7 +449,7 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
 		id: issueNumber,
 		filename,
 		frontmatter,
-		content: '\n## Details\n\n<!-- Add detailed description here -->\n\n'
+		content: `\n${body}\n`
 	}
 }
 
@@ -482,14 +478,17 @@ export async function updateIssue(
 		updated: formatDate()
 	}
 
+	const updatedContent =
+		input.body !== undefined ? `\n${input.body}\n` : issue.content
 	const content = `${generateFrontmatter(updatedFrontmatter)}
-${issue.content}`
+${updatedContent}`
 
 	await writeFile(join(getIssuesDir(), issue.filename), content)
 
 	return {
 		...issue,
-		frontmatter: updatedFrontmatter
+		frontmatter: updatedFrontmatter,
+		content: updatedContent
 	}
 }
 
