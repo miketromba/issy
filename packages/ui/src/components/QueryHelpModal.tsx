@@ -8,7 +8,7 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
 
 	return (
 		<div
-			className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-5"
+			className="fixed inset-0 bg-black/70 flex items-center justify-center z-1000 p-5"
 			onClick={onClose}
 		>
 			<div
