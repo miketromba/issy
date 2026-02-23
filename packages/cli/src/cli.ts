@@ -59,7 +59,7 @@ function formatIssueRow(issue: {
 	}
 }): string {
 	const status = issue.frontmatter.status === 'open' ? 'OPEN  ' : 'CLOSED'
-	return `  ${issue.id}  ${prioritySymbol(issue.frontmatter.priority)}   ${typeSymbol(issue.frontmatter.type)}    ${status}  ${issue.frontmatter.title.slice(0, 45)}`
+	return `  ${issue.id}  ${prioritySymbol(issue.frontmatter.priority)}   ${typeSymbol(issue.frontmatter.type)}    ${status}  ${issue.frontmatter.title}`
 }
 
 /**
@@ -143,7 +143,7 @@ async function listIssues(options: {
 	}
 
 	console.log('\n  ID    Pri  Type  Status   Title')
-	console.log(`  ${'-'.repeat(70)}`)
+	console.log(`  ${'-'.repeat(100)}`)
 
 	for (const issue of issues) {
 		console.log(formatIssueRow(issue))
@@ -202,7 +202,7 @@ async function searchIssuesCommand(query: string, options: { all?: boolean }) {
 
 	console.log(`\n  Search results for "${query}":`)
 	console.log('\n  ID    Pri  Type  Status   Title')
-	console.log(`  ${'-'.repeat(70)}`)
+	console.log(`  ${'-'.repeat(100)}`)
 
 	for (const issue of issues) {
 		console.log(formatIssueRow(issue))
