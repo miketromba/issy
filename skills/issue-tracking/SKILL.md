@@ -65,6 +65,10 @@ After deployment, `curl https://api.example.com/health` should return `{"status"
 
 **The rule:** Capture what the user says. If they provide implementation details, include them. If they don't, keep it high-level.
 
+## Issue Sizing
+
+An issue should be completable and verifiable in a single focused session — pick it up, implement it, prove it works, close it. If that's not realistic, split along verification boundaries so each child issue is independently closeable. Don't split when it adds overhead without adding clarity.
+
 ## Roadmap Ordering
 
 issy maintains a **roadmap** — a strict, intentional ordering of all open issues. Every open issue has a position in the roadmap, and the ordering is designed to be dependency-aware and chronological. No issue should be blocked by one that follows it.
