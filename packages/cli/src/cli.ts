@@ -24,6 +24,8 @@ import {
 	getIssue,
 	getNextIssue,
 	getOnCloseContent,
+	getOnCreateContent,
+	getOnUpdateContent,
 	getOpenIssuesByOrder,
 	reopenIssue,
 	resolveIssyDir,
@@ -249,6 +251,11 @@ async function createIssueCommand(options: {
 
 		const issue = await createIssue(input)
 		console.log(`\nCreated issue: ${issue.filename}`)
+
+		const onCreateContent = await getOnCreateContent()
+		if (onCreateContent) {
+			console.log(`\n${onCreateContent.trim()}\n`)
+		}
 	} catch (e) {
 		console.error(e instanceof Error ? e.message : 'Failed to create issue')
 		process.exit(1)
@@ -293,6 +300,11 @@ async function updateIssueCommand(
 			order
 		})
 		console.log(`Updated issue: ${issue.filename}`)
+
+		const onUpdateContent = await getOnUpdateContent()
+		if (onUpdateContent) {
+			console.log(`\n${onUpdateContent.trim()}\n`)
+		}
 	} catch (e) {
 		console.error(e instanceof Error ? e.message : 'Failed to update issue')
 		process.exit(1)

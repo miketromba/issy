@@ -150,9 +150,17 @@ issy list --sort priority     # Sort by priority instead
 issy list --sort created      # Sort by creation date
 ```
 
-### On-Close Hook
+### Hooks
 
-Create a `.issy/on_close.md` file to inject context after every successful close. The file contents are printed to stdout, making them visible to AI agents in their command output. Use this for post-close reminders like updating documentation.
+issy supports optional hook files in `.issy/` that inject context into stdout after successful operations. The file contents are printed directly, making them visible to AI agents in their command output.
+
+| Hook file | Triggered after |
+|-----------|----------------|
+| `on_create.md` | Creating an issue |
+| `on_update.md` | Updating an issue |
+| `on_close.md` | Closing an issue |
+
+Use these for post-action reminders like updating documentation, running checks, or prompting the agent with project-specific instructions.
 
 ### Monorepo Support
 
@@ -163,6 +171,8 @@ issy automatically walks up from the current directory to find an existing `.iss
 my-monorepo/
   .issy/              # ← issy finds this automatically
     issues/
+    on_create.md
+    on_update.md
     on_close.md
   packages/
     frontend/         # ← works from here

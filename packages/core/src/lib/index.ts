@@ -35,6 +35,8 @@ export {
 	getNextIssue,
 	getNextIssueNumber,
 	getOnCloseContent,
+	getOnCreateContent,
+	getOnUpdateContent,
 	getOpenIssuesByOrder,
 	hasLegacyIssuesDir,
 	parseFrontmatter,

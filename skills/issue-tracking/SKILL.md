@@ -135,9 +135,15 @@ issy reopen <id> --last
 issy reopen <id> --after 0004
 ```
 
-## On-Close Hook
+## Hooks
 
-When an issue is closed, issy automatically prints the contents of `.issy/on_close.md` if it exists. This is useful for injecting reminders into the agent's context — for example, prompting the agent to update documentation or run post-close checks.
+issy supports optional hook files in `.issy/` that print context to stdout after successful operations. This is useful for injecting reminders into the agent's context — for example, prompting the agent to update documentation or run post-action checks.
+
+| Hook file | Triggered after |
+|-----------|----------------|
+| `on_create.md` | Creating an issue |
+| `on_update.md` | Updating an issue |
+| `on_close.md` | Closing an issue |
 
 ## Project Structure
 
@@ -148,6 +154,8 @@ Issues are stored in `.issy/issues/` as markdown files with YAML frontmatter. Th
   issues/
     0001-fix-login-redirect.md
     0002-add-dark-mode.md
+  on_create.md   # Optional: printed after successful create
+  on_update.md   # Optional: printed after successful update
   on_close.md    # Optional: printed after successful close
 ```
 

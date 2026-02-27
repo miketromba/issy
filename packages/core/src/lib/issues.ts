@@ -189,7 +189,8 @@ export function parseFrontmatter(content: string): {
 		const colonIdx = line.indexOf(':')
 		if (colonIdx > 0) {
 			const key = line.slice(0, colonIdx).trim()
-			const value = line.slice(colonIdx + 1).trim()
+			const rawValue = line.slice(colonIdx + 1).trim()
+			const value = key === 'title' ? yamlUnquote(rawValue) : rawValue
 			;(frontmatter as Record<string, string>)[key] = value
 		}
 	}
@@ -197,9 +198,31 @@ export function parseFrontmatter(content: string): {
 	return { frontmatter, body }
 }
 
+function yamlQuote(value: string): string {
+	if (/[:#\[\]{}&*!|>'"%@`,\n]/.test(value) || value !== value.trim()) {
+		const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+		return `"${escaped}"`
+	}
+	return value
+}
+
+function yamlUnquote(value: string): string {
+	if (
+		(value.startsWith('"') && value.endsWith('"')) ||
+		(value.startsWith("'") && value.endsWith("'"))
+	) {
+		const inner = value.slice(1, -1)
+		if (value.startsWith('"')) {
+			return inner.replace(/\\"/g, '"').replace(/\\\\/g, '\\')
+		}
+		return inner
+	}
+	return value
+}
+
 export function generateFrontmatter(data: IssueFrontmatter): string {
 	const lines = ['---']
-	lines.push(`title: ${data.title}`)
+	lines.push(`title: ${yamlQuote(data.title)}`)
 	lines.push(`priority: ${data.priority}`)
 	if (data.scope) {
 		lines.push(`scope: ${data.scope}`)
@@ -510,16 +533,24 @@ export async function deleteIssue(id: string): Promise<void> {
 
 // --- Hooks ---
 
-/**
- * Read the on_close.md hook content if it exists.
- */
-export async function getOnCloseContent(): Promise<string | null> {
+async function readHookFile(filename: string): Promise<string | null> {
 	try {
-		const onClosePath = join(getIssyDir(), 'on_close.md')
-		return await readFile(onClosePath, 'utf-8')
+		return await readFile(join(getIssyDir(), filename), 'utf-8')
 	} catch {
 		return null
 	}
+}
+
+export async function getOnCloseContent(): Promise<string | null> {
+	return readHookFile('on_close.md')
+}
+
+export async function getOnCreateContent(): Promise<string | null> {
+	return readHookFile('on_create.md')
+}
+
+export async function getOnUpdateContent(): Promise<string | null> {
+	return readHookFile('on_update.md')
 }
 
 // --- Next issue ---
