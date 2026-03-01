@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/miketromba/issy/main/assets/issy-logo.png" alt="issy" width="600" />
+  <img src="https://raw.githubusercontent.com/miketromba/issy/main/assets/issy-banner.png" alt="issy" width="600" />
 </p>
 
 <p align="center">
