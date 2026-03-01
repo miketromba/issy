@@ -1,0 +1,42 @@
+---
+interface SidebarSection {
+	title: string;
+	items: { title: string; slug: string }[];
+}
+
+interface Props {
+	sections: SidebarSection[];
+	currentSlug: string;
+}
+
+const { sections, currentSlug } = Astro.props;
+---
+
+<nav class="space-y-6">
+	{
+		sections.map((section) => (
+			<div>
+				<h4 class="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+					{section.title}
+				</h4>
+				<ul class="space-y-0.5">
+					{section.items.map((item) => (
+						<li>
+							<a
+								href={`/docs/${item.slug}`}
+								class:list={[
+									"block rounded-md px-3 py-1.5 text-sm transition-colors",
+									currentSlug === item.slug
+										? "bg-accent-dim text-accent font-medium"
+										: "text-text-secondary hover:text-text hover:bg-bg-hover",
+								]}
+							>
+								{item.title}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		))
+	}
+</nav>

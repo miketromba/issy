@@ -1,0 +1,56 @@
+---
+interface Props {
+	currentPath?: string;
+}
+
+const { currentPath = "" } = Astro.props;
+const isDocsActive = currentPath.startsWith("/docs");
+---
+
+<header class="sticky top-0 z-50 border-b border-white/10 bg-bg/80 backdrop-blur-xl">
+	<div class="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
+		<a href="/" class="flex items-center gap-2 group">
+			<svg class="h-7 w-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect x="3" y="7" width="26" height="18" rx="4" fill="#f5ede2" />
+				<circle cx="3" cy="13" r="2.5" fill="#c99cac" />
+				<circle cx="3" cy="21" r="2.5" fill="#c99cac" />
+				<circle cx="29" cy="13" r="2.5" fill="#c99cac" />
+				<circle cx="29" cy="21" r="2.5" fill="#c99cac" />
+				<circle cx="12.5" cy="15" r="1.5" fill="#3d3548" />
+				<circle cx="19.5" cy="15" r="1.5" fill="#3d3548" />
+				<path d="M14 19c0.6 0.9 1.3 1.2 2 1.2s1.4-0.3 2-1.2" stroke="#3d3548" stroke-width="1.2" stroke-linecap="round" />
+			</svg>
+			<span class="text-lg font-bold text-text group-hover:text-peach transition-colors">issy</span>
+		</a>
+
+		<nav class="flex items-center gap-1">
+			<a
+				href="/docs/getting-started"
+				class:list={[
+					"rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+					isDocsActive
+						? "text-text bg-bg-elevated"
+						: "text-text-secondary hover:text-text hover:bg-bg-hover",
+				]}
+			>
+				Docs
+			</a>
+			<a
+				href="https://github.com/miketromba/issy"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="rounded-lg px-3 py-1.5 text-sm font-medium text-text-secondary hover:text-text hover:bg-bg-hover transition-colors"
+			>
+				GitHub
+			</a>
+			<a
+				href="https://www.npmjs.com/package/issy"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="rounded-lg px-3 py-1.5 text-sm font-medium text-text-secondary hover:text-text hover:bg-bg-hover transition-colors"
+			>
+				npm
+			</a>
+		</nav>
+	</div>
+</header>

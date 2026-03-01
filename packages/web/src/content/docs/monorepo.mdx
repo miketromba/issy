@@ -1,0 +1,67 @@
+---
+title: Monorepo Support
+description: How issy works in monorepo setups with automatic directory resolution.
+order: 10
+---
+
+issy is designed to work seamlessly in monorepos. It automatically walks up from the current directory to find the `.issy/` folder, so you can run commands from any subdirectory.
+
+## How it works
+
+When you run any `issy` command, it:
+
+1. Checks the current directory for `.issy/`
+2. If not found, walks up to parent directories
+3. Uses the first `.issy/` directory it finds
+
+This means issues are typically stored at the repository root, and every package/subdirectory shares the same issue tracker.
+
+## Example structure
+
+```
+my-monorepo/
+  .issy/                 # ← issy finds this automatically
+    issues/
+      0001-fix-auth.md
+      0002-add-feature.md
+    on_create.md
+    on_update.md
+    on_close.md
+  packages/
+    frontend/            # ← `issy list` works here
+    backend/             # ← and here
+    shared/              # ← and here
+```
+
+## Usage from subdirectories
+
+```bash
+cd packages/frontend
+issy list               # Finds and uses ../../.issy/
+issy next               # Same — resolves to root .issy/
+```
+
+No special configuration needed. All commands resolve to the same issues directory regardless of where you run them.
+
+## Best practices
+
+- **Keep `.issy/` at the repo root** — This is the most common and recommended setup
+- **One issue tracker per repo** — Avoid placing `.issy/` in subdirectories unless you specifically want separate trackers
+- **Use `ISSY_DIR`** — If you need to override resolution, set the `ISSY_DIR` environment variable to an explicit path
+
+## Multiple issue trackers
+
+If you need separate issue trackers for different packages (uncommon), you can place `.issy/` directories in subdirectories:
+
+```
+my-monorepo/
+  packages/
+    frontend/
+      .issy/             # Frontend-specific issues
+        issues/
+    backend/
+      .issy/             # Backend-specific issues
+        issues/
+```
+
+In this case, each subdirectory resolves to its own `.issy/`. This is an advanced pattern — most teams should use a single tracker at the root.

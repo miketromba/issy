@@ -1,0 +1,54 @@
+---
+title: Getting Started
+description: Learn what issy is and how to get up and running in minutes.
+order: 1
+---
+
+issy is an **AI-native issue tracking system**. It gives your AI coding assistant the ability to manage issues using natural language. Issues are stored as markdown files in `.issy/issues/` — readable, diffable, and committed with your code.
+
+No database. No accounts. No vendor lock-in.
+
+## How it works
+
+Install the AI skill, then talk to your assistant naturally:
+
+> "Create a bug for the login redirect issue, high priority"
+
+> "What issues are open?"
+
+> "Close the auth bug, it's fixed"
+
+> "What should I work on next?"
+
+Your assistant creates, searches, updates, and closes issues for you. Everything is stored as plain markdown files in your repository.
+
+## Quick start
+
+**1. Install issy globally:**
+
+```bash
+npm install issy --global
+```
+
+**2. Initialize issues in your project:**
+
+```bash
+issy init --seed
+```
+
+**3. Install the AI skill:**
+
+```bash
+issy skill install
+```
+
+That's it. Your AI assistant can now manage issues in any repo. Head to the [Installation](/docs/installation) page for more options, or learn about the [AI Skill](/docs/ai-skill) to understand what your assistant can do.
+
+## What you get
+
+- **AI Skill** — Natural language issue management via your coding assistant
+- **CLI** — Full terminal workflow for creating, listing, searching, and managing issues
+- **Web UI** — Local browser interface for browsing and filtering issues
+- **Roadmap Ordering** — Dependency-aware prioritization with fractional indexing
+- **Hooks** — Post-action reminders injected into AI agent context
+- **Monorepo Support** — Automatic directory resolution from any subdirectory

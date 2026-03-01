@@ -1,0 +1,50 @@
+---
+title: Configuration
+description: Environment variables and configuration options for issy.
+order: 9
+---
+
+issy is designed to work with zero configuration. For cases where you need to customize behavior, environment variables are available.
+
+## Environment variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ISSY_DIR` | Path to the issy directory | `./.issy` |
+| `ISSUES_PORT` | Port for the web UI server | `1554` |
+
+### ISSY_DIR
+
+Override the default `.issy` directory location:
+
+```bash
+ISSY_DIR=/path/to/custom/.issy issy list
+```
+
+This is useful when your issues directory is in a non-standard location.
+
+### ISSUES_PORT
+
+Change the port for the web UI server:
+
+```bash
+ISSUES_PORT=3000 issy
+```
+
+The web UI will then be available at `http://localhost:3000`.
+
+## Directory resolution
+
+By default, issy looks for `.issy/` in the current directory and walks upward through parent directories until it finds one. This means you can run commands from any subdirectory in your project.
+
+See [Monorepo Support](/docs/monorepo) for details on how this works in monorepo setups.
+
+## Version pinning
+
+When collaborating, pin your issy version in `package.json`:
+
+```bash
+npm install issy --save-dev
+```
+
+Global `issy` automatically defers to the local version if one exists, ensuring everyone on the team uses the same version.

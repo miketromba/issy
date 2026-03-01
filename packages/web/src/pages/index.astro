@@ -1,0 +1,297 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<BaseLayout
+	title="issy"
+	description="AI-native issue tracking. Markdown files in .issy/issues/, managed by your coding assistant. No database, no accounts, no vendor lock-in."
+>
+	<Header />
+
+	<!-- Hero -->
+	<section class="relative overflow-hidden hero-gradient">
+		<!-- Floating # symbols -->
+		<div class="pointer-events-none absolute inset-0 overflow-hidden hidden lg:block" aria-hidden="true">
+			<span class="float-symbol absolute top-[15%] left-[8%] text-[#8b5040] text-4xl font-extrabold opacity-60" style="animation-delay: 0s;">#</span>
+			<span class="float-symbol absolute top-[55%] left-[15%] text-[#4a7088] text-3xl font-extrabold opacity-55" style="animation-delay: 1.2s;">#</span>
+			<span class="float-symbol absolute top-[35%] left-[25%] text-[#6e5088] text-5xl font-extrabold opacity-50" style="animation-delay: 0.6s;">#</span>
+			<span class="float-symbol absolute top-[72%] left-[6%] text-[#6e5088] text-3xl font-extrabold opacity-45" style="animation-delay: 2s;">#</span>
+			<span class="float-symbol absolute top-[18%] right-[10%] text-[#6e5088] text-4xl font-extrabold opacity-55" style="animation-delay: 0.4s;">#</span>
+			<span class="float-symbol absolute top-[48%] right-[6%] text-[#8b5040] text-5xl font-extrabold opacity-60" style="animation-delay: 1.6s;">#</span>
+			<span class="float-symbol absolute top-[70%] right-[18%] text-[#4a7088] text-3xl font-extrabold opacity-50" style="animation-delay: 0.8s;">#</span>
+			<span class="float-symbol absolute top-[30%] right-[22%] text-[#8b5040] text-3xl font-extrabold opacity-45" style="animation-delay: 2.2s;">#</span>
+		</div>
+
+		<div class="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pt-20 sm:pt-28 pb-20 text-center">
+			<!-- Mascot -->
+			<div class="mx-auto mb-6 relative w-fit">
+				<svg class="h-24 w-28 sm:h-28 sm:w-32 drop-shadow-lg" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<!-- Ticket body - cream colored like the banner mascot -->
+					<rect x="4" y="10" width="48" height="36" rx="8" fill="#f5ede2" />
+					<rect x="4" y="10" width="48" height="36" rx="8" fill="url(#ticketShade)" />
+					<!-- Ticket notches -->
+					<circle cx="4" cy="22" r="4" fill="#c99cac" />
+					<circle cx="4" cy="34" r="4" fill="#c99cac" />
+					<circle cx="52" cy="22" r="4" fill="#c99cac" />
+					<circle cx="52" cy="34" r="4" fill="#c99cac" />
+					<!-- Eyes -->
+					<circle cx="21" cy="27" r="2.5" fill="#3d3548" />
+					<circle cx="35" cy="27" r="2.5" fill="#3d3548" />
+					<!-- Smile -->
+					<path d="M24 33c1.5 2 3.5 2.5 4.5 2.5s3-0.5 4.5-2.5" stroke="#3d3548" stroke-width="2" stroke-linecap="round" />
+					<!-- Blue checkmark badge -->
+					<circle cx="50" cy="12" r="9" fill="#4a8fd9" />
+					<path d="M45.5 12l3 3 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+					<defs>
+						<linearGradient id="ticketShade" x1="28" y1="10" x2="28" y2="46" gradientUnits="userSpaceOnUse">
+							<stop offset="0" stop-color="white" stop-opacity="0.2" />
+							<stop offset="1" stop-color="#c8b8a8" stop-opacity="0.15" />
+						</linearGradient>
+					</defs>
+				</svg>
+			</div>
+
+			<h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight mb-4 text-[#2d2840]">
+				issy
+			</h1>
+			<p class="text-lg sm:text-xl font-medium text-[#4a3d5c] mb-3">AI-native issue tracking</p>
+			<p class="text-base sm:text-lg text-[#5c4e6e]/80 max-w-lg mx-auto mb-10 leading-relaxed">
+				Tell your coding assistant what to track. It handles the rest.
+				Issues stored as markdown — no database, no accounts.
+			</p>
+			<div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+				<a
+					href="/docs/getting-started"
+					class="inline-flex items-center gap-2 rounded-xl bg-[#2d2840] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-black/15 hover:bg-[#3d3555] transition-colors"
+				>
+					Get Started
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+					</svg>
+				</a>
+				<a
+					href="https://github.com/miketromba/issy"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="inline-flex items-center gap-2 rounded-xl bg-white/25 backdrop-blur-sm border border-white/20 px-7 py-3 text-sm font-medium text-[#2d2840] hover:bg-white/35 transition-colors"
+				>
+					<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+					</svg>
+					GitHub
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Natural language examples -->
+	<section class="relative py-16 sm:py-20">
+		<div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+			<h2 class="text-center text-sm font-semibold uppercase tracking-wider text-text-muted mb-10">
+				Just talk naturally
+			</h2>
+			<div class="space-y-3">
+				{[
+					"Create a bug for the login redirect issue, high priority",
+					"What issues are open?",
+					"Close the auth bug, it's fixed",
+					"What should I work on next?",
+				].map((example) => (
+					<div class="flex items-start gap-3 rounded-xl border border-border-subtle bg-bg-surface px-5 py-3.5">
+						<span class="mt-0.5 text-peach font-medium select-none">&gt;</span>
+						<p class="text-text-secondary text-[0.9375rem]">&ldquo;{example}&rdquo;</p>
+					</div>
+				))}
+			</div>
+			<p class="text-center text-text-muted text-sm mt-6">
+				Your AI assistant creates, searches, updates, and closes issues for you.
+			</p>
+		</div>
+	</section>
+
+	<!-- Why Markdown -->
+	<section class="py-16 sm:py-20">
+		<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h2 class="text-2xl sm:text-3xl font-bold mb-3">Why Markdown?</h2>
+				<p class="text-text-secondary max-w-xl mx-auto">
+					Issues stored as plain markdown files. No database, no vendor lock-in, no accounts.
+				</p>
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				{[
+					{
+						icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
+						title: "Portable",
+						desc: "No vendor lock-in, no database, no accounts. Your issues are just files.",
+						color: "text-peach",
+						bg: "bg-peach/10",
+					},
+					{
+						icon: "M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4",
+						title: "Git-native",
+						desc: "Issues travel with your code. They appear in diffs, PRs, and branches.",
+						color: "text-teal",
+						bg: "bg-teal/10",
+					},
+					{
+						icon: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z",
+						title: "Transparent",
+						desc: "AI agents read and write issues directly. No API wrappers or abstractions.",
+						color: "text-lavender",
+						bg: "bg-lavender/10",
+					},
+					{
+						icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
+						title: "Works offline",
+						desc: "No network dependency. Issues are local files that work anywhere.",
+						color: "text-accent",
+						bg: "bg-accent-dim",
+					},
+				].map((feature) => (
+					<div class="group rounded-xl border border-border-subtle bg-bg-surface p-6 hover:border-border transition-colors">
+						<div class:list={["mb-4 flex h-10 w-10 items-center justify-center rounded-lg", feature.bg]}>
+							<svg class:list={["h-5 w-5", feature.color]} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+								<path stroke-linecap="round" stroke-linejoin="round" d={feature.icon} />
+							</svg>
+						</div>
+						<h3 class="text-base font-semibold mb-1.5">{feature.title}</h3>
+						<p class="text-sm text-text-secondary leading-relaxed">{feature.desc}</p>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- Features -->
+	<section class="py-16 sm:py-20">
+		<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-14">
+				<h2 class="text-2xl sm:text-3xl font-bold mb-3">Everything you need</h2>
+				<p class="text-text-secondary max-w-xl mx-auto">
+					A complete issue tracking system designed for AI-assisted workflows.
+				</p>
+			</div>
+
+			<div class="grid gap-12 lg:gap-16">
+				<!-- AI Skill -->
+				<div class="flex flex-col lg:flex-row gap-8 items-start">
+					<div class="flex-1">
+						<div class="inline-flex items-center gap-2 text-xs font-semibold text-lavender uppercase tracking-wider mb-3">
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+							</svg>
+							AI Skill
+						</div>
+						<h3 class="text-xl font-bold mb-2">Natural language issue management</h3>
+						<p class="text-text-secondary mb-4 leading-relaxed">
+							Install the skill and your AI coding assistant can create, search, update, and close issues using plain English. No commands to memorize.
+						</p>
+						<div class="rounded-xl border border-border-subtle bg-bg-elevated p-4 font-mono text-sm">
+							<div class="text-text-muted">$</div>
+							<div class="text-text">issy skill install</div>
+							<div class="text-green-400 mt-1">&#10003; Skill installed successfully</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- CLI -->
+				<div class="flex flex-col lg:flex-row gap-8 items-start">
+					<div class="flex-1">
+						<div class="inline-flex items-center gap-2 text-xs font-semibold text-peach uppercase tracking-wider mb-3">
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+							</svg>
+							CLI
+						</div>
+						<h3 class="text-xl font-bold mb-2">Full terminal workflow</h3>
+						<p class="text-text-secondary mb-4 leading-relaxed">
+							Create, list, search, update, and close issues without leaving your terminal. Roadmap ordering keeps your backlog prioritized.
+						</p>
+						<div class="rounded-xl border border-border-subtle bg-bg-elevated p-4 font-mono text-sm space-y-2">
+							<div><span class="text-text-muted">$</span> <span class="text-text">issy list</span></div>
+							<div class="text-text-secondary">
+								<div>#0001 <span class="text-red-400">[high]</span> <span class="text-green-400">[open]</span> Fix login redirect</div>
+								<div>#0002 <span class="text-yellow-400">[med]</span>&nbsp; <span class="text-green-400">[open]</span> Add dark mode support</div>
+								<div>#0003 <span class="text-green-400">[low]</span>&nbsp; <span class="text-green-400">[open]</span> Export issues to CSV</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Web UI -->
+				<div class="flex flex-col gap-6 items-start">
+					<div>
+						<div class="inline-flex items-center gap-2 text-xs font-semibold text-teal uppercase tracking-wider mb-3">
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+							</svg>
+							Web UI
+						</div>
+						<h3 class="text-xl font-bold mb-2">Browse issues visually</h3>
+						<p class="text-text-secondary mb-4 leading-relaxed max-w-2xl">
+							Run <code class="text-sm bg-bg-elevated border border-border-subtle px-1.5 py-0.5 rounded">issy</code> to launch a local web interface for browsing, filtering, and reading issues.
+						</p>
+					</div>
+					<div class="w-full rounded-xl border border-border overflow-hidden shadow-2xl shadow-black/50">
+						<img
+							src="/web-ui-screenshot.png"
+							alt="issy web UI showing issue list with filters and issue detail view"
+							class="w-full"
+							width="1024"
+							height="640"
+							loading="lazy"
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Quick Start -->
+	<section class="py-16 sm:py-24">
+		<div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 text-center">
+			<h2 class="text-2xl sm:text-3xl font-bold mb-3">Get started in seconds</h2>
+			<p class="text-text-secondary mb-8">
+				Install globally, then add the AI skill to your project.
+			</p>
+
+			<div class="space-y-3 text-left">
+				<div class="rounded-xl border border-border-subtle bg-bg-elevated p-4">
+					<div class="text-xs text-text-muted mb-2 font-medium">Install issy</div>
+					<div class="font-mono text-sm">
+						<code class="text-text">npm install issy --global</code>
+					</div>
+				</div>
+				<div class="rounded-xl border border-border-subtle bg-bg-elevated p-4">
+					<div class="text-xs text-text-muted mb-2 font-medium">Install the AI skill</div>
+					<div class="font-mono text-sm">
+						<code class="text-text">issy skill install</code>
+					</div>
+				</div>
+				<div class="rounded-xl border border-border-subtle bg-bg-elevated p-4">
+					<div class="text-xs text-text-muted mb-2 font-medium">Start tracking issues</div>
+					<div class="font-mono text-sm">
+						<code class="text-text-secondary">&gt; &ldquo;Create a high priority bug for the login crash&rdquo;</code>
+					</div>
+				</div>
+			</div>
+
+			<div class="mt-10">
+				<a
+					href="/docs/getting-started"
+					class="inline-flex items-center gap-2 rounded-xl bg-accent px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 hover:bg-accent-hover transition-colors"
+				>
+					Read the docs
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+					</svg>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<Footer />
+</BaseLayout>

@@ -1,0 +1,70 @@
+---
+title: Hooks
+description: Optional hook files that inject context into stdout after issue operations.
+order: 8
+---
+
+issy supports optional hook files that print context to stdout after successful operations. This is particularly useful for injecting reminders into AI agent context — prompting agents to perform follow-up actions after creating, updating, or closing issues.
+
+## Available hooks
+
+| Hook file | Triggered after |
+|-----------|----------------|
+| `on_create.md` | Creating an issue |
+| `on_update.md` | Updating an issue |
+| `on_close.md` | Closing an issue |
+
+Hook files are placed in the `.issy/` directory:
+
+```
+.issy/
+  issues/
+    0001-fix-login.md
+  on_create.md      # ← Hooks go here
+  on_update.md
+  on_close.md
+```
+
+## How hooks work
+
+When an operation succeeds, issy checks for the corresponding hook file. If it exists, the file's contents are printed directly to stdout. Since AI agents see command output, the hook content becomes part of the agent's context.
+
+## Use cases
+
+### Post-create reminders
+
+Prompt the agent to commit the new issue or update related docs:
+
+```markdown
+<!-- .issy/on_create.md -->
+Remember to `git add` and commit the new issue file.
+```
+
+### Post-update checks
+
+Remind the agent to verify changes:
+
+```markdown
+<!-- .issy/on_update.md -->
+If you changed the priority, make sure the roadmap order still
+makes sense. Run `issy list` to verify.
+```
+
+### Post-close follow-ups
+
+Prompt cleanup or documentation tasks:
+
+```markdown
+<!-- .issy/on_close.md -->
+Consider:
+- Adding resolution notes to the issue if you discovered anything useful
+- Committing the closed issue
+- Running the test suite to verify the fix
+```
+
+## Tips
+
+- Keep hooks concise — they're injected into agent context, so brevity matters
+- Use markdown formatting so the content is readable by both humans and agents
+- Hooks are optional — only create the ones you need
+- Hook content is printed as-is, with no processing or templating

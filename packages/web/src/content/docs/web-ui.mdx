@@ -1,0 +1,67 @@
+---
+title: Web UI
+description: Browse and filter issues with issy's local web interface.
+order: 5
+---
+
+issy includes a local web UI for browsing issues visually. It's a read-write interface that runs in your browser.
+
+## Launching
+
+Run `issy` without any arguments:
+
+```bash
+issy
+```
+
+This starts a local server at `http://localhost:1554`. The port can be configured with the `ISSUES_PORT` environment variable.
+
+```bash
+ISSUES_PORT=3000 issy
+```
+
+## Features
+
+The web UI provides:
+
+- **Issue list** — Browse all issues with priority, status, type, and label badges
+- **Search and filter** — Use the query bar with issy's query language
+- **Issue detail** — Read full issue content with rendered markdown
+- **Create, edit, and close** — Manage issues directly from the browser
+- **Roadmap order** — Issues are sorted by roadmap position by default
+
+## Query language
+
+The search bar supports issy's query language for filtering:
+
+```
+is:open                      # Open issues only
+is:closed                    # Closed issues only
+priority:high                # High priority
+type:bug                     # Bugs only
+scope:large                  # Large scope
+label:frontend               # Issues with "frontend" label
+```
+
+Combine filters:
+
+```
+is:open priority:high type:bug
+```
+
+Free text search also works — just type keywords and issy will fuzzy-match against issue titles and content.
+
+## API
+
+The web UI is backed by a REST API that you can also use programmatically:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/issues` | GET | List issues (supports `q` query parameter) |
+| `/api/issues/:id` | GET | Get a single issue |
+| `/api/issues/create` | POST | Create an issue |
+| `/api/issues/:id` | PATCH | Update an issue |
+| `/api/issues/:id/close` | POST | Close an issue |
+| `/api/issues/:id/reopen` | POST | Reopen an issue |
+| `/api/issues/:id/delete` | DELETE | Delete an issue |
+| `/api/health` | GET | Health check |

@@ -1,0 +1,97 @@
+---
+title: AI Skill
+description: How to install and use the issy AI skill for natural language issue management.
+order: 3
+---
+
+The AI skill is what makes issy special. Once installed, your AI coding assistant (Cursor, Windsurf, etc.) can manage issues through plain English conversation.
+
+## Installing the skill
+
+```bash
+issy skill install
+```
+
+Or, without installing `issy` first:
+
+```bash
+npx skills add miketromba/issy
+```
+
+The skill is installed into your project and is automatically picked up by compatible AI assistants.
+
+## What the skill enables
+
+With the skill installed, your assistant understands how to:
+
+- **Create issues** with appropriate priority, type, scope, and roadmap position
+- **List and search** open issues with filters and fuzzy matching
+- **Read** full issue details including body content
+- **Update** issue properties and reposition in the roadmap
+- **Close** issues when work is complete
+- **Reopen** issues when needed
+
+## Natural language examples
+
+Just talk to your assistant:
+
+> "Create a high priority bug for the login crash"
+
+> "What issues are open?"
+
+> "Show me the next issue to work on"
+
+> "Search for anything related to authentication"
+
+> "Close issue 0001, the fix is deployed"
+
+> "Create an improvement to add dark mode, put it after the auth work"
+
+The assistant translates your intent into the appropriate `issy` CLI commands.
+
+## How it works
+
+The skill provides your AI assistant with:
+
+1. **Context** about issy's CLI commands and their options
+2. **Guidelines** for writing good issue descriptions
+3. **Rules** for roadmap ordering and issue placement
+4. **Best practices** for issue sizing, verification, and resolution notes
+
+The assistant uses the `issy` CLI under the hood, so all operations produce the same markdown files as manual CLI usage.
+
+## Issue authoring guidelines
+
+The skill instructs your assistant to write issues that capture:
+
+- **Problem/Overview** — What's wrong or what's needed
+- **Proposed Solution** — High-level approach
+- **Acceptance Criteria** — What "done" looks like (optional)
+- **Verification** — How to prove the issue is resolved (optional but encouraged)
+
+The assistant captures your intent without inventing implementation details. If you provide specific technical details, they'll be included. Otherwise, issues stay high-level.
+
+## Verification guidance
+
+The skill encourages including verification steps so implementing agents can prove work is complete:
+
+```markdown
+## Verification
+Run `bun test src/auth.test.ts` — all tests should pass,
+including the new "handles expired tokens" case.
+```
+
+```markdown
+## Verification
+After deployment, `curl https://api.example.com/health`
+should return `{"status": "ok"}` with a 200 response.
+```
+
+## Closing issues with learnings
+
+When closing an issue, the skill prompts the assistant to append a `## Resolution Notes` section if anything useful was discovered:
+
+- Alternative approaches considered or rejected
+- Unexpected gotchas or edge cases
+- Decisions that differ from the original plan
+- Useful context for future reference

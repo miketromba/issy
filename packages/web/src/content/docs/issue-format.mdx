@@ -1,0 +1,103 @@
+---
+title: Issue Format
+description: How issy stores issues as markdown files with YAML frontmatter.
+order: 6
+---
+
+Issues are stored as individual markdown files in `.issy/issues/`. Each file has YAML frontmatter for metadata and a markdown body for details.
+
+## File structure
+
+```
+.issy/
+  issues/
+    0001-fix-login-redirect.md
+    0002-add-dark-mode.md
+    0003-export-issues-csv.md
+  on_create.md    # Optional hook
+  on_update.md    # Optional hook
+  on_close.md     # Optional hook
+```
+
+Filenames follow the pattern `{id}-{slug}.md` where the ID is a zero-padded 4-digit number and the slug is derived from the title.
+
+## Example issue
+
+```markdown
+---
+title: Fix login redirect
+priority: high
+scope: medium
+type: bug
+status: open
+order: a0
+created: 2025-01-15T10:30:00
+---
+
+## Problem
+
+After OAuth login, users are redirected to `/callback` but the
+session isn't established, causing a redirect loop.
+
+## Steps to reproduce
+
+1. Click "Sign in with Google"
+2. Complete OAuth flow
+3. Observe redirect loop
+
+## Expected behavior
+
+User should land on dashboard after successful authentication.
+```
+
+## Frontmatter fields
+
+| Field | Required | Values | Description |
+|-------|----------|--------|-------------|
+| `title` | Yes | string | Issue title |
+| `priority` | Yes | `high`, `medium`, `low` | Priority level |
+| `type` | Yes | `bug`, `improvement` | Issue type |
+| `status` | Yes | `open`, `closed` | Current status |
+| `order` | Auto | string | Fractional index key for roadmap position |
+| `created` | Auto | ISO 8601 | Creation timestamp |
+| `scope` | No | `small`, `medium`, `large` | Estimated effort |
+| `labels` | No | comma-separated | Custom labels |
+
+## Field details
+
+### Priority
+
+- **`high`** — Critical issues, blockers, or urgent fixes
+- **`medium`** — Important but not blocking
+- **`low`** — Nice to have, backlog items
+
+### Type
+
+- **`bug`** — Something is broken or not working as expected
+- **`improvement`** — New feature, enhancement, or refactoring
+
+### Scope
+
+Scope is optional and indicates estimated effort:
+
+- **`small`** — Quick fix, a few lines of code
+- **`medium`** — A focused session of work
+- **`large`** — Significant effort, possibly multiple sessions
+
+### Labels
+
+Free-form comma-separated strings for categorization:
+
+```yaml
+labels: frontend, auth, critical
+```
+
+### Order
+
+The `order` field is a fractional index key managed by issy. It determines the issue's position in the [roadmap](/docs/roadmap-ordering). You should not edit this field manually.
+
+## Body content
+
+Everything after the frontmatter closing `---` is the issue body. Write standard markdown — headings, lists, code blocks, links, etc.
+
+The body is fully rendered in the [Web UI](/docs/web-ui) and displayed as raw markdown when using `issy read`.

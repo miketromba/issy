@@ -1,0 +1,182 @@
+---
+title: CLI Reference
+description: Complete reference for all issy CLI commands and options.
+order: 4
+---
+
+The `issy` CLI is your primary interface for managing issues from the terminal. All commands work with the `.issy/issues/` directory in your project.
+
+## Commands
+
+### `issy`
+
+Launch the web UI at `http://localhost:1554` for browsing issues in the browser.
+
+```bash
+issy
+```
+
+### `issy init`
+
+Create the `.issy/issues/` directory structure.
+
+```bash
+issy init              # Create empty directory
+issy init --seed       # Create with a welcome issue
+```
+
+### `issy list`
+
+List issues in roadmap order (default).
+
+```bash
+issy list                     # Open issues only
+issy list --all               # Include closed issues
+issy list --priority high     # Filter by priority
+issy list --scope small       # Filter by scope
+issy list --type bug          # Filter by type
+issy list --search "keyword"  # Fuzzy search
+issy list --sort priority     # Sort by priority
+issy list --sort created      # Sort by creation date
+issy list --sort id           # Sort by ID
+```
+
+**Filters:**
+
+| Flag | Values |
+|------|--------|
+| `--priority` | `high`, `medium`, `low` |
+| `--scope` | `small`, `medium`, `large` |
+| `--type` | `bug`, `improvement` |
+
+**Sort options:**
+
+| Value | Description |
+|-------|-------------|
+| `roadmap` | Roadmap order (default) |
+| `priority` | By priority level |
+| `created` | By creation date |
+| `updated` | By last update |
+| `id` | By issue ID |
+
+### `issy next`
+
+Show the next issue to work on (first open issue in roadmap order).
+
+```bash
+issy next
+```
+
+### `issy search`
+
+Fuzzy search across issue titles and content.
+
+```bash
+issy search "dashboard"        # Search open issues
+issy search "k8s" --all        # Include closed issues
+```
+
+### `issy read`
+
+View the full contents of an issue.
+
+```bash
+issy read 0001
+```
+
+### `issy create`
+
+Create a new issue. When other open issues exist, you **must** specify a position.
+
+```bash
+issy create --title "Fix login bug" --type bug --priority high --after 0002
+issy create --title "Add dark mode" --type improvement --last --labels "ui, frontend"
+issy create --title "Urgent fix" --first
+issy create --title "Fix crash" --body "## Problem\n\nApp crashes on startup." --last
+```
+
+**Required flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--title` | Issue title |
+
+**Optional flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--type` | `bug` or `improvement` |
+| `--priority` | `high`, `medium`, or `low` |
+| `--scope` | `small`, `medium`, or `large` |
+| `--labels` | Comma-separated labels |
+| `--body` | Issue body content (markdown) |
+
+**Position flags** (required when open issues exist):
+
+| Flag | Description |
+|------|-------------|
+| `--before <id>` | Insert before issue |
+| `--after <id>` | Insert after issue |
+| `--first` | Insert at beginning |
+| `--last` | Insert at end |
+
+### `issy update`
+
+Update an existing issue's properties.
+
+```bash
+issy update 0001 --priority low
+issy update 0001 --after 0003          # Reposition in roadmap
+issy update 0001 --first               # Move to top
+issy update 0001 --labels "api, backend"
+issy update 0001 --body "New details"  # Replace body content
+```
+
+### `issy close`
+
+Close an issue.
+
+```bash
+issy close 0001
+```
+
+### `issy reopen`
+
+Reopen a closed issue. Position flags are required when other open issues exist.
+
+```bash
+issy reopen 0001 --last
+issy reopen 0001 --after 0004
+```
+
+### `issy skill install`
+
+Install the AI skill for your coding assistant.
+
+```bash
+issy skill install
+```
+
+### `issy migrate`
+
+Migrate from `.issues/` (v0.4.x format) to `.issy/`.
+
+```bash
+issy migrate
+```
+
+### `issy help`
+
+Show help information.
+
+```bash
+issy help
+```
+
+### `issy --version`
+
+Display the installed version.
+
+```bash
+issy --version
+```

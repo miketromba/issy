@@ -1,0 +1,100 @@
+---
+title: Installation
+description: Install issy globally and in your repository for the best experience.
+order: 2
+---
+
+issy can be installed both globally **and** in your repository. We recommend both for the best experience — global for convenience, local for version pinning.
+
+## Global installation
+
+A global install brings flexibility and speed to your local workflows.
+
+```bash
+# npm
+npm install issy --global
+
+# pnpm
+pnpm add issy --global
+
+# yarn
+yarn global add issy
+
+# bun
+bun install issy --global
+```
+
+Once installed globally, run commands from your terminal:
+
+```bash
+issy                          # Start the web UI
+issy list                     # List open issues (roadmap order)
+issy next                     # Show next issue to work on
+issy create --title "Bug"     # Create an issue
+```
+
+## Repository installation
+
+When collaborating with other developers, pin the version by adding issy as a `devDependency`:
+
+```bash
+# npm
+npm install issy --save-dev
+
+# pnpm
+pnpm add issy --save-dev --ignore-workspace-root-check
+
+# yarn
+yarn add issy --dev --ignore-workspace-root-check
+
+# bun
+bun add issy --dev
+```
+
+You can continue using your global installation to run commands. Global `issy` automatically defers to the local version if one exists.
+
+## Initialize a project
+
+Create the `.issy/issues/` directory in your project:
+
+```bash
+issy init
+```
+
+Add `--seed` to create a welcome issue that demonstrates the format:
+
+```bash
+issy init --seed
+```
+
+## Install the AI skill
+
+The AI skill lets your coding assistant manage issues through natural language:
+
+```bash
+issy skill install
+```
+
+Or, without installing `issy` first:
+
+```bash
+npx skills add miketromba/issy
+```
+
+## Verify installation
+
+Check that everything is working:
+
+```bash
+issy --version
+```
+
+## Migrating from v0.4
+
+If upgrading from v0.4.x (which used `.issues/` instead of `.issy/`):
+
+```bash
+issy migrate
+```
+
+This moves your issues to `.issy/issues/` and assigns roadmap order to all open issues.

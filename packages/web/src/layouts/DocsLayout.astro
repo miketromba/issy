@@ -1,0 +1,162 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+interface Props {
+	title: string;
+	description: string;
+	currentSlug: string;
+}
+
+const { title, description, currentSlug } = Astro.props;
+
+const sections = [
+	{
+		title: "Basics",
+		items: [
+			{ title: "Getting Started", slug: "getting-started" },
+			{ title: "Installation", slug: "installation" },
+		],
+	},
+	{
+		title: "Core",
+		items: [
+			{ title: "AI Skill", slug: "ai-skill" },
+			{ title: "CLI Reference", slug: "cli" },
+			{ title: "Web UI", slug: "web-ui" },
+		],
+	},
+	{
+		title: "Concepts",
+		items: [
+			{ title: "Issue Format", slug: "issue-format" },
+			{ title: "Roadmap Ordering", slug: "roadmap-ordering" },
+		],
+	},
+	{
+		title: "Advanced",
+		items: [
+			{ title: "Hooks", slug: "hooks" },
+			{ title: "Configuration", slug: "configuration" },
+			{ title: "Monorepo Support", slug: "monorepo" },
+		],
+	},
+];
+
+const allItems = sections.flatMap((s) => s.items);
+const currentIndex = allItems.findIndex((item) => item.slug === currentSlug);
+const prev = currentIndex > 0 ? allItems[currentIndex - 1] : null;
+const next = currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
+---
+
+<BaseLayout title={title} description={description}>
+	<Header currentPath={`/docs/${currentSlug}`} />
+
+	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+		<!-- Mobile sidebar -->
+		<div class="lg:hidden">
+			<details class="mb-6 rounded-lg border border-border bg-bg-surface">
+				<summary class="cursor-pointer px-4 py-3 text-sm font-medium text-text-secondary select-none">
+					Navigation — {title}
+				</summary>
+				<nav class="px-4 pb-3 space-y-4">
+					{sections.map((section) => (
+						<div>
+							<h4 class="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1.5">
+								{section.title}
+							</h4>
+							<ul class="space-y-0.5">
+								{section.items.map((item) => (
+									<li>
+										<a
+											href={`/docs/${item.slug}`}
+											class:list={[
+												"block rounded-md px-3 py-1.5 text-sm transition-colors",
+												currentSlug === item.slug
+													? "bg-accent-dim text-accent font-medium"
+													: "text-text-secondary hover:text-text",
+											]}
+										>
+											{item.title}
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</nav>
+			</details>
+		</div>
+
+		<div class="flex gap-10">
+			<!-- Sidebar (desktop) -->
+			<aside class="hidden lg:block w-56 shrink-0">
+				<nav class="sticky top-24 space-y-6">
+					{sections.map((section) => (
+						<div>
+							<h4 class="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+								{section.title}
+							</h4>
+							<ul class="space-y-0.5">
+								{section.items.map((item) => (
+									<li>
+										<a
+											href={`/docs/${item.slug}`}
+											class:list={[
+												"block rounded-md px-3 py-1.5 text-sm transition-colors",
+												currentSlug === item.slug
+													? "bg-accent-dim text-accent font-medium"
+													: "text-text-secondary hover:text-text hover:bg-bg-hover",
+											]}
+										>
+											{item.title}
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</nav>
+			</aside>
+
+			<!-- Main content -->
+			<main class="min-w-0 flex-1 max-w-3xl">
+				<article class="docs-content">
+					<slot />
+				</article>
+
+				<!-- Prev / Next navigation -->
+				<nav class="mt-16 flex items-center justify-between border-t border-border-subtle pt-6">
+					{prev ? (
+						<a
+							href={`/docs/${prev.slug}`}
+							class="group flex flex-col items-start text-sm"
+						>
+							<span class="text-text-muted text-xs mb-1">Previous</span>
+							<span class="text-text-secondary group-hover:text-accent transition-colors">
+								← {prev.title}
+							</span>
+						</a>
+					) : (
+						<div />
+					)}
+					{next ? (
+						<a
+							href={`/docs/${next.slug}`}
+							class="group flex flex-col items-end text-sm"
+						>
+							<span class="text-text-muted text-xs mb-1">Next</span>
+							<span class="text-text-secondary group-hover:text-accent transition-colors">
+								{next.title} →
+							</span>
+						</a>
+					) : (
+						<div />
+					)}
+				</nav>
+			</main>
+		</div>
+	</div>
+
+	<Footer />
+</BaseLayout>

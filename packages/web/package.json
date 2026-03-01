@@ -1,0 +1,26 @@
+{
+  "name": "@miketromba/issy-web",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "lint": "astro check"
+  },
+  "dependencies": {
+    "astro": "^5.7.10",
+    "@astrojs/react": "^4.2.1",
+    "@astrojs/mdx": "^4.2.4",
+    "@astrojs/sitemap": "^3.3.1",
+    "@astrojs/check": "^0.9.4",
+    "@tailwindcss/vite": "^4.1.4",
+    "tailwindcss": "^4.1.4",
+    "react": "^19",
+    "react-dom": "^19",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.8.3"
+  }
+}
