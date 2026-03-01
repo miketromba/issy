@@ -199,6 +199,7 @@ export function parseFrontmatter(content: string): {
 }
 
 function yamlQuote(value: string): string {
+	// biome-ignore lint/complexity/noUselessEscapeInRegex: \[ is needed inside the character class for correct matching
 	if (/[:#\[\]{}&*!|>'"%@`,\n]/.test(value) || value !== value.trim()) {
 		const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 		return `"${escaped}"`
