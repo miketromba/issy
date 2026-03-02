@@ -16,7 +16,9 @@
 	--color-lavender: #b8a0d4;
 	--color-lavender-dim: rgba(184, 160, 212, 0.1);
 	--color-peach: #e8997f;
-	--color-teal: #7ba8c0;
+	--color-peach-dim: rgba(232, 153, 127, 0.1);
+	--color-teal: #5ec4b0;
+	--color-teal-dim: rgba(94, 196, 176, 0.1);
 }
 
 html {
