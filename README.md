@@ -10,7 +10,8 @@
 
 <p align="center">
   <strong>AI-native issue tracking.</strong><br>
-  Tell your coding assistant what to track. It handles the rest.
+  Tell your coding assistant what to track. It handles the rest.<br>
+  <a href="https://issy.sh">issy.sh</a>
 </p>
 
 ---
