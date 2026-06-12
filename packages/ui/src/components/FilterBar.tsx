@@ -142,11 +142,16 @@ function extractUniqueValues(
 export function FilterBar({ query, onQueryChange, issues }: FilterBarProps) {
 	const parsed = parseQuery(query)
 
-	// Dynamically extract options from actual issue data
 	const statusOptions = useMemo(
-		() => extractUniqueValues(issues, 'status'),
-		[issues]
+		() => [
+			{ value: 'open', label: 'Open' },
+			{ value: 'closed', label: 'Closed' },
+			{ value: 'unblocked', label: 'Unblocked' },
+			{ value: 'blocked', label: 'Blocked' }
+		],
+		[]
 	)
+	// Dynamically extract options from actual issue data
 	const priorityOptions = useMemo(
 		() => extractUniqueValues(issues, 'priority'),
 		[issues]

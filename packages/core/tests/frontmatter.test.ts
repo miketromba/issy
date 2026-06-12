@@ -21,6 +21,24 @@ describe('Frontmatter', () => {
 		expect(frontmatter.order).toBe('a0V')
 	})
 
+	test('parseFrontmatter extracts depends_on field', () => {
+		const content = [
+			'---',
+			'title: Test',
+			'priority: high',
+			'type: bug',
+			'status: open',
+			'depends_on: 0012, 0035',
+			'created: 2026-01-01T00:00:00',
+			'---',
+			'',
+			'Body content'
+		].join('\n')
+
+		const { frontmatter } = parseFrontmatter(content)
+		expect(frontmatter.depends_on).toBe('0012, 0035')
+	})
+
 	test('parseFrontmatter handles missing order field', () => {
 		const content = [
 			'---',
@@ -52,6 +70,20 @@ describe('Frontmatter', () => {
 		expect(result).toContain('order: a0V')
 	})
 
+	test('generateFrontmatter includes depends_on when present', () => {
+		const data: IssueFrontmatter = {
+			title: 'Test',
+			priority: 'high',
+			type: 'bug',
+			status: 'open',
+			depends_on: '0012, 0035',
+			created: '2026-01-01T00:00:00'
+		}
+
+		const result = generateFrontmatter(data)
+		expect(result).toContain('depends_on: 0012, 0035')
+	})
+
 	test('generateFrontmatter omits order when undefined', () => {
 		const data: IssueFrontmatter = {
 			title: 'Test',
@@ -80,6 +112,21 @@ describe('Frontmatter', () => {
 		expect(frontmatter.order).toBe('a1')
 		expect(frontmatter.title).toBe('Test')
 		expect(frontmatter.priority).toBe('medium')
+	})
+
+	test('roundtrip: generate then parse preserves depends_on', () => {
+		const data: IssueFrontmatter = {
+			title: 'Test',
+			priority: 'medium',
+			type: 'improvement',
+			status: 'open',
+			depends_on: '0012, 0035',
+			created: '2026-01-01T00:00:00'
+		}
+
+		const generated = generateFrontmatter(data)
+		const { frontmatter } = parseFrontmatter(`${generated}\n\nBody`)
+		expect(frontmatter.depends_on).toBe('0012, 0035')
 	})
 
 	test('generateFrontmatter quotes title with colon', () => {

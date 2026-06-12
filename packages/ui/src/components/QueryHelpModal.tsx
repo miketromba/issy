@@ -41,8 +41,8 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
 						<div className="flex flex-col gap-2">
 							<QualifierRow
 								qualifier="is:"
-								description="Filter by status"
-								values="open, closed"
+								description="Filter by status or blocker state"
+								values="open, closed, unblocked, blocked"
 							/>
 							<QualifierRow
 								qualifier="priority:"
@@ -80,6 +80,10 @@ export function QueryHelpModal({ isOpen, onClose }: QueryHelpModalProps) {
 							<ExampleRow
 								code="is:open priority:high"
 								description="High priority open issues"
+							/>
+							<ExampleRow
+								code="is:unblocked"
+								description="Open issues with no open blockers"
 							/>
 							<ExampleRow
 								code="scope:small priority:high"

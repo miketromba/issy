@@ -12,6 +12,14 @@ Every open issue has a position in the roadmap determined by its `order` field. 
 
 When you run `issy list`, issues appear in roadmap order by default. `issy next` always returns the first issue — the next thing to work on.
 
+Issues can also declare explicit blockers with `depends_on`:
+
+```yaml
+depends_on: 0012, 0035
+```
+
+An issue is unblocked when it is open and none of its existing dependencies are still open. Dependency IDs that do not match an existing issue are ignored.
+
 ## Position flags
 
 When creating or reopening an issue while other open issues exist, you **must** specify where it fits in the roadmap:
@@ -56,6 +64,7 @@ issy reopen 0001 --after 0004
 Think about logical dependency when choosing position:
 
 - If issue B requires work from issue A, A must come **before** B
+- If issue B cannot start until issue A closes, add A to B's `depends_on`
 - Place foundational/infrastructure work **early**
 - Place user-facing features **later**
 - Use `--first` for urgent work that should be tackled immediately
@@ -72,6 +81,8 @@ issy list --sort created     # By creation date
 issy list --sort updated     # By last update
 issy list --sort id          # By issue ID
 ```
+
+Use `issy list --unblocked` to show only open issues with no open blockers. The normal list output also includes a compact `Blk` column: `-` means unblocked, otherwise the value is the number of currently open blockers.
 
 ## Technical details
 

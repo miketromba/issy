@@ -33,7 +33,7 @@ const QUALIFIER_KEYS = [
  * Valid values for each qualifier
  */
 const QUALIFIER_VALUES: Record<string, readonly string[]> = {
-	is: ['open', 'closed'] as const,
+	is: ['open', 'closed', 'unblocked', 'blocked'] as const,
 	priority: ['high', 'medium', 'low'] as const,
 	scope: ['small', 'medium', 'large'] as const,
 	type: ['bug', 'improvement'] as const,
@@ -213,7 +213,7 @@ function getPreviousToken(text: string): string | null {
  */
 function getQualifierDescription(key: string): string {
 	const descriptions: Record<string, string> = {
-		is: 'Filter by status',
+		is: 'Filter by status or blocker state',
 		priority: 'Filter by priority',
 		scope: 'Filter by scope',
 		type: 'Filter by type',
@@ -228,7 +228,10 @@ function getQualifierDescription(key: string): string {
  */
 function getValueDescription(key: string, value: string): string {
 	if (key === 'is') {
-		return value === 'open' ? 'Open issues' : 'Closed issues'
+		if (value === 'open') return 'Open issues'
+		if (value === 'closed') return 'Closed issues'
+		if (value === 'unblocked') return 'Open issues with no open blockers'
+		if (value === 'blocked') return 'Open issues with open blockers'
 	}
 	if (key === 'priority') {
 		return `Priority: ${value}`

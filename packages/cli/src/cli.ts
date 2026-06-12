@@ -2,11 +2,11 @@
  * issy CLI
  *
  * Usage:
- *   issy list [--all] [--priority <p>] [--scope <s>] [--type <t>] [--search <q>] [--sort <s>]
+ *   issy list [--all] [--unblocked] [--priority <p>] [--scope <s>] [--type <t>] [--search <q>] [--sort <s>]
  *   issy read <id>
  *   issy search <query>
- *   issy create [--title <t>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
- *   issy update <id> [--title <t>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--before <id> | --after <id>]
+ *   issy create [--title <t>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--depends-on <ids>] [--before <id> | --after <id>]
+ *   issy update <id> [--title <t>] [--body <b>] [--priority <p>] [--scope <s>] [--type <t>] [--labels <l>] [--depends-on <ids>] [--before <id> | --after <id>]
  *   issy close <id>
  *   issy reopen <id> [--before <id> | --after <id>]
  *   issy next
@@ -20,13 +20,18 @@ import {
 	computeOrderKey,
 	createIssue,
 	filterByQuery,
+	formatExistingDependencyIds,
 	getAllIssues,
+	getBlockingIssues,
+	getDependencyIssues,
 	getIssue,
 	getNextIssue,
 	getOnCloseContent,
 	getOnCreateContent,
 	getOnUpdateContent,
 	getOpenIssuesByOrder,
+	type Issue,
+	isIssueUnblocked,
 	reopenIssue,
 	resolveIssyDir,
 	updateIssue
@@ -58,10 +63,32 @@ function formatIssueRow(issue: {
 		type: string
 		status: string
 		title: string
+		depends_on?: string
 	}
+	blockers: number
 }): string {
 	const status = issue.frontmatter.status === 'open' ? 'OPEN  ' : 'CLOSED'
-	return `  ${issue.id}  ${prioritySymbol(issue.frontmatter.priority)}   ${typeSymbol(issue.frontmatter.type)}    ${status}  ${issue.frontmatter.title}`
+	const blocked = issue.blockers > 0 ? String(issue.blockers) : '-'
+	return `  ${issue.id}  ${prioritySymbol(issue.frontmatter.priority)}   ${typeSymbol(issue.frontmatter.type)}    ${status}  ${blocked.padEnd(3)}  ${issue.frontmatter.title}`
+}
+
+function printDependsOn(issue: Issue, issues: Issue[]): void {
+	const dependencyIssues = getDependencyIssues(issue, issues)
+	if (dependencyIssues.length === 0) return
+
+	console.log(
+		`  Depends on:  ${dependencyIssues.map(i => `#${i.id}`).join(', ')}`
+	)
+}
+
+function getDependsOnArg(values: Record<string, unknown>): string | undefined {
+	const value = values['depends-on']
+	return typeof value === 'string' ? value : undefined
+}
+
+async function resolveDependsOn(value: string | undefined, excludeId?: string) {
+	if (value === undefined) return undefined
+	return formatExistingDependencyIds(value, await getAllIssues(), excludeId)
 }
 
 /**
@@ -125,30 +152,39 @@ async function listIssues(options: {
 	type?: string
 	search?: string
 	sort?: string
+	unblocked?: boolean
 }) {
 	const allIssues = await getAllIssues()
 
 	const queryParts: string[] = []
-	if (!options.all) queryParts.push('is:open')
+	if (!options.all && !options.unblocked) queryParts.push('is:open')
 	if (options.priority) queryParts.push(`priority:${options.priority}`)
 	if (options.scope) queryParts.push(`scope:${options.scope}`)
 	if (options.type) queryParts.push(`type:${options.type}`)
 	if (options.sort) queryParts.push(`sort:${options.sort}`)
 	if (options.search) queryParts.push(options.search)
 
-	const query = queryParts.join(' ') || 'is:open'
-	const issues = filterByQuery(allIssues, query)
+	const query = queryParts.join(' ')
+	let issues = query ? filterByQuery(allIssues, query) : allIssues
+	if (options.unblocked) {
+		issues = issues.filter(issue => isIssueUnblocked(issue, allIssues))
+	}
 
 	if (issues.length === 0) {
 		console.log('No issues found.')
 		return
 	}
 
-	console.log('\n  ID    Pri  Type  Status   Title')
+	console.log('\n  ID    Pri  Type  Status  Blk  Title')
 	console.log(`  ${'-'.repeat(100)}`)
 
 	for (const issue of issues) {
-		console.log(formatIssueRow(issue))
+		console.log(
+			formatIssueRow({
+				...issue,
+				blockers: getBlockingIssues(issue, allIssues).length
+			})
+		)
 	}
 
 	console.log(`\n  Total: ${issues.length} issue(s)\n`)
@@ -156,6 +192,7 @@ async function listIssues(options: {
 
 async function readIssue(id: string) {
 	const issue = await getIssue(id)
+	const allIssues = await getAllIssues()
 
 	if (!issue) {
 		console.error(`Issue not found: ${id}`)
@@ -179,6 +216,7 @@ async function readIssue(id: string) {
 	if (issue.frontmatter.labels) {
 		console.log(`  Labels:      ${issue.frontmatter.labels}`)
 	}
+	printDependsOn(issue, allIssues)
 	if (issue.frontmatter.order) {
 		console.log(`  Order:       ${issue.frontmatter.order}`)
 	}
@@ -203,11 +241,16 @@ async function searchIssuesCommand(query: string, options: { all?: boolean }) {
 	}
 
 	console.log(`\n  Search results for "${query}":`)
-	console.log('\n  ID    Pri  Type  Status   Title')
+	console.log('\n  ID    Pri  Type  Status  Blk  Title')
 	console.log(`  ${'-'.repeat(100)}`)
 
 	for (const issue of issues) {
-		console.log(formatIssueRow(issue))
+		console.log(
+			formatIssueRow({
+				...issue,
+				blockers: getBlockingIssues(issue, allIssues).length
+			})
+		)
 	}
 
 	console.log(`\n  Found: ${issues.length} issue(s)\n`)
@@ -220,6 +263,7 @@ async function createIssueCommand(options: {
 	scope?: string
 	type?: string
 	labels?: string
+	dependsOn?: string
 	before?: string
 	after?: string
 	first?: boolean
@@ -246,6 +290,8 @@ async function createIssueCommand(options: {
 			scope: options.scope as 'small' | 'medium' | 'large' | undefined,
 			type: options.type as 'bug' | 'improvement',
 			labels: options.labels,
+			depends_on:
+				(await resolveDependsOn(options.dependsOn)) || undefined,
 			order
 		}
 
@@ -271,6 +317,7 @@ async function updateIssueCommand(
 		scope?: string
 		type?: string
 		labels?: string
+		dependsOn?: string
 		before?: string
 		after?: string
 		first?: boolean
@@ -297,6 +344,10 @@ async function updateIssueCommand(
 			scope: options.scope as 'small' | 'medium' | 'large' | undefined,
 			type: options.type as 'bug' | 'improvement' | undefined,
 			labels: options.labels,
+			...(options.dependsOn !== undefined && {
+				depends_on:
+					(await resolveDependsOn(options.dependsOn, id)) || ''
+			}),
 			order
 		})
 		console.log(`Updated issue: ${issue.filename}`)
@@ -355,6 +406,7 @@ async function reopenIssueCommand(
 
 async function nextIssueCommand() {
 	const issue = await getNextIssue()
+	const allIssues = await getAllIssues()
 
 	if (!issue) {
 		console.log('No open issues.')
@@ -378,6 +430,7 @@ async function nextIssueCommand() {
 	if (issue.frontmatter.labels) {
 		console.log(`  Labels:      ${issue.frontmatter.labels}`)
 	}
+	printDependsOn(issue, allIssues)
 	if (issue.frontmatter.order) {
 		console.log(`  Order:       ${issue.frontmatter.order}`)
 	}
@@ -413,6 +466,7 @@ Options:
 Commands:
   list                    List all open issues (roadmap order)
     --all, -a             Include closed issues
+    --unblocked           Only show open issues with no open blockers
     --priority, -p <p>    Filter by priority (high, medium, low)
     --scope <s>           Filter by scope (small, medium, large)
     --type, -t <t>        Filter by type (bug, improvement)
@@ -433,6 +487,7 @@ Commands:
     --scope <s>           Scope (small, medium, large)
     --type <t>            Type (bug, improvement)
     --labels, -l <l>      Comma-separated labels
+    --depends-on <ids>    Comma-separated blocking issue IDs
     --before <id>         Insert before this issue in roadmap
     --after <id>          Insert after this issue in roadmap
     --first               Insert at the beginning of the roadmap
@@ -445,6 +500,7 @@ Commands:
     --scope <s>           New scope
     --type <t>            New type
     --labels, -l <l>      New labels
+    --depends-on <ids>    Replace blocking issue IDs (empty clears)
     --before <id>         Move before this issue in roadmap
     --after <id>          Move after this issue in roadmap
     --first               Move to the beginning of the roadmap
@@ -462,6 +518,7 @@ Commands:
 
 Examples:
   issy list
+  issy list --unblocked
   issy list --priority high --type bug
   issy next
   issy read 0001
@@ -484,6 +541,7 @@ List all open issues in roadmap order.
 
 Options:
   --all, -a             Include closed issues
+  --unblocked           Only show open issues with no open blockers
   --priority, -p <p>    Filter by priority (high, medium, low)
   --scope <s>           Filter by scope (small, medium, large)
   --type, -t <t>        Filter by type (bug, improvement)
@@ -496,6 +554,7 @@ Options:
 				args: args.slice(1),
 				options: {
 					all: { type: 'boolean', short: 'a' },
+					unblocked: { type: 'boolean' },
 					priority: { type: 'string', short: 'p' },
 					scope: { type: 'string' },
 					type: { type: 'string', short: 't' },
@@ -577,6 +636,7 @@ Options:
   --scope <s>           Scope: small, medium, large
   --type <t>            Type: bug, improvement (default: improvement)
   --labels, -l <l>      Comma-separated labels
+  --depends-on <ids>    Comma-separated blocking issue IDs
   --before <id>         Insert before this issue in roadmap
   --after <id>          Insert after this issue in roadmap
   --first               Insert at the beginning of the roadmap
@@ -584,6 +644,7 @@ Options:
 
 Examples:
   issy create --title "Fix login bug" --type bug --priority high --after 0002
+  issy create --title "Add export" --depends-on 0001,0002 --last
   issy create --title "Add dark mode" --last
 `)
 				return
@@ -597,6 +658,7 @@ Examples:
 					scope: { type: 'string' },
 					type: { type: 'string' },
 					labels: { type: 'string', short: 'l' },
+					'depends-on': { type: 'string' },
 					before: { type: 'string' },
 					after: { type: 'string' },
 					first: { type: 'boolean' },
@@ -604,7 +666,10 @@ Examples:
 				},
 				allowPositionals: true
 			})
-			await createIssueCommand(values)
+			await createIssueCommand({
+				...values,
+				dependsOn: getDependsOnArg(values)
+			})
 			break
 		}
 
@@ -621,6 +686,7 @@ Options:
   --scope <s>           New scope: small, medium, large
   --type <t>            New type: bug, improvement
   --labels, -l <l>      New labels (comma-separated)
+  --depends-on <ids>    Replace blocking issue IDs (empty clears)
   --before <id>         Move before this issue in roadmap
   --after <id>          Move after this issue in roadmap
   --first               Move to the beginning of the roadmap
@@ -628,6 +694,7 @@ Options:
 
 Examples:
   issy update 0001 --priority low --after 0003
+  issy update 0002 --depends-on 0001,0003
   issy update 0002 --title "Renamed issue" --first
 `)
 				return
@@ -646,6 +713,7 @@ Examples:
 					scope: { type: 'string' },
 					type: { type: 'string' },
 					labels: { type: 'string', short: 'l' },
+					'depends-on': { type: 'string' },
 					before: { type: 'string' },
 					after: { type: 'string' },
 					first: { type: 'boolean' },
@@ -653,7 +721,10 @@ Examples:
 				},
 				allowPositionals: true
 			})
-			await updateIssueCommand(id, values)
+			await updateIssueCommand(id, {
+				...values,
+				dependsOn: getDependsOnArg(values)
+			})
 			break
 		}
 
