@@ -71,6 +71,21 @@ Show the next issue to work on (first open issue in roadmap order).
 issy next
 ```
 
+### `issy learn`
+
+Print AI-agent instructions for the installed issy version.
+
+```bash
+issy learn              # Compact default guidance
+issy learn topics       # List focused topics
+issy learn authoring    # Issue writing guidance
+issy learn roadmap      # Roadmap placement rules
+issy learn commands     # CLI command reference for agents
+issy learn hooks        # Hook file behavior
+issy learn agents       # AGENTS.md and skill bootstrap guidance
+issy learn --all        # Full reference
+```
+
 ### `issy search`
 
 Fuzzy search across issue titles and content.
@@ -158,11 +173,13 @@ issy reopen 0001 --after 0004
 
 ### `issy skill install`
 
-Install the AI skill for your coding assistant.
+Install the lightweight bootstrap skill for assistants that support skills.
 
 ```bash
 issy skill install
 ```
+
+The skill tells compatible agents when to run `issy learn`; the detailed agent reference lives in the CLI output.
 
 ### `issy migrate`
 

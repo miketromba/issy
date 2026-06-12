@@ -1,6 +1,6 @@
 {
   "name": "@miketromba/issy-app",
-  "version": "0.9.0",
+  "version": "0.10.1",
   "description": "Local web UI and API server for issy",
   "type": "module",
   "license": "MIT",

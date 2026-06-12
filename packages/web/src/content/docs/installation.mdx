@@ -31,6 +31,7 @@ issy                          # Start the web UI
 issy list                     # List open issues (roadmap order)
 issy next                     # Show next issue to work on
 issy create --title "Bug"     # Create an issue
+issy learn                    # Print AI-agent instructions
 ```
 
 ## Repository installation
@@ -67,19 +68,33 @@ Add `--seed` to create a welcome issue that demonstrates the format:
 issy init --seed
 ```
 
-## Install the AI skill
+## Teach AI agents
 
-The AI skill lets your coding assistant manage issues through natural language:
+`issy learn` prints the canonical AI-agent reference for your installed issy version:
+
+```bash
+issy learn
+```
+
+Add this line to AGENTS.md so agents know when to load it:
+
+```md
+When the task involves creating, reading, updating, listing, searching, prioritizing, closing, reopening, or choosing project issues, tasks, bugs, improvements, or roadmap work, run `issy learn` first and follow its guidance.
+```
+
+For assistants that support skills, you can also install the lightweight bootstrap skill:
 
 ```bash
 issy skill install
 ```
 
-Or, without installing `issy` first:
+Or, without running the issy wrapper:
 
 ```bash
 npx skills add miketromba/issy
 ```
+
+The CLI still needs to be available when the assistant runs `issy learn`.
 
 ## Verify installation
 
