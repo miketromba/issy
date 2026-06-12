@@ -33,19 +33,3 @@ npx skills add miketromba/issy
 ```
 
 The skill only defines the relevance rule and tells the assistant to run `issy learn`. The operational reference lives in the CLI so it stays aligned with the installed issy version. The `issy` CLI still needs to be available when the assistant runs `issy learn`.
-
-## Focused learning
-
-Agents can load only the context they need:
-
-```bash
-issy learn topics
-issy learn authoring
-issy learn roadmap
-issy learn commands
-issy learn hooks
-issy learn agents
-issy learn --all
-```
-
-Use the compact default for normal issue work, a focused topic for deeper context, and `--all` only when the full reference is needed.

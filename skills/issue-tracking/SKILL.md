@@ -15,11 +15,4 @@ Follow the instructions printed by `issy learn`. That output is the canonical ag
 
 If `issy learn` is unavailable because the CLI is not installed, ask the user to install `issy` first, then rerun `issy learn`.
 
-For focused context, use:
-
-```bash
-issy learn topics
-issy learn <topic>
-```
-
 Do not rely on this skill file for operational details. It is only a bootstrap adapter that points agents to `issy learn`.

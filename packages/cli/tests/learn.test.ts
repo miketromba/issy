@@ -6,36 +6,26 @@ describe('getLearnOutput', () => {
 	test('returns compact agent instructions by default', () => {
 		const output = getLearnOutput()
 
-		expect(output).toContain('# issy agent instructions')
-		expect(output).toContain('run `issy learn` before acting')
-		expect(output).toContain('issy learn topics')
-		expect(output).toContain('issy list --unblocked')
-		expect(output).toContain('--depends-on')
+		expect(output).toContain('# Track issues with the issy CLI')
+		expect(output).toContain('## Authoring Issues')
+		expect(output).toContain('## CLI Commands')
+		expect(output).toContain('issy create --title "Fix login bug"')
+		expect(output).toContain('## Project Structure')
+		expect(output).toContain('## Issue Properties')
+		expect(output).not.toContain('issy learn topics')
 	})
 
-	test('returns focused topic output', () => {
-		const output = getLearnOutput(['roadmap'])
+	test('returns usage help', () => {
+		const output = getLearnOutput(['--help'])
 
-		expect(output).toContain('# issy roadmap ordering')
-		expect(output).toContain('--before <id>')
-		expect(output).not.toContain('# issy issue authoring')
+		expect(output).toContain('Usage: issy learn [options]')
+		expect(output).toContain('issy learn')
+		expect(output).not.toContain('Topics:')
 	})
 
-	test('supports topic aliases', () => {
-		const output = getLearnOutput(['cli'])
-
-		expect(output).toContain('# issy CLI command reference')
-	})
-
-	test('lists topics', () => {
-		const output = getLearnOutput(['topics'])
-
-		expect(output).toContain('# issy learn topics')
-		expect(output).toContain('`authoring`')
-		expect(output).toContain('`agents`')
-	})
-
-	test('throws on unknown topics', () => {
-		expect(() => getLearnOutput(['missing'])).toThrow('Unknown learn topic')
+	test('throws on extra arguments', () => {
+		expect(() => getLearnOutput(['roadmap'])).toThrow(
+			'Unknown learn argument'
+		)
 	})
 })

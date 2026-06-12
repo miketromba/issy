@@ -151,7 +151,6 @@ issy update 0001 --body "New details"     # Replace body content
 issy close 0001               # Close issue
 issy reopen 0001 --after 0004 # Reopen and place in roadmap
 issy learn                    # Print compact AI-agent instructions
-issy learn roadmap            # Print focused topic instructions
 issy skill install            # Install the AI bootstrap skill
 issy migrate                  # Migrate from .issues/ to .issy/
 issy --version                # Check version

@@ -10,7 +10,7 @@
  *   issy close <id>
  *   issy reopen <id> [--before <id> | --after <id>]
  *   issy next
- *   issy learn [topic]
+ *   issy learn
  */
 
 import { parseArgs } from 'node:util'
@@ -481,9 +481,7 @@ Commands:
 
   next                    Show the next issue to work on
 
-  learn [topic]           Print AI-agent instructions for this issy version
-    --all                 Print the full reference
-    --list                List focused topics
+  learn                   Print AI-agent instructions for this issy version
 
   create                  Create a new issue
     --title, -t <t>       Issue title
@@ -527,7 +525,6 @@ Examples:
   issy list --priority high --type bug
   issy next
   issy learn
-  issy learn roadmap
   issy read 0001
   issy create --title "Fix login bug" --type bug --priority high --after 0002
   issy create --title "Add dark mode" --last
