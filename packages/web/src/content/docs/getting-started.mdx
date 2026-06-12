@@ -10,7 +10,7 @@ No database. No accounts. No vendor lock-in.
 
 ## How it works
 
-Install the AI skill, then talk to your assistant naturally:
+Teach your AI assistant to run `issy learn` for issue work, then talk naturally:
 
 > "Create a bug for the login redirect issue, high priority"
 
@@ -36,17 +36,19 @@ npm install issy --global
 issy init --seed
 ```
 
-**3. Install the AI skill:**
+**3. Teach your AI assistant:**
 
 ```bash
-issy skill install
+issy learn
 ```
 
-That's it. Your AI assistant can now manage issues in any repo. Head to the [Installation](/docs/installation) page for more options, or learn about the [AI Skill](/docs/ai-skill) to understand what your assistant can do.
+Add the AGENTS.md snippet from [AI Agents](/docs/ai-skill), or install the bootstrap skill with `issy skill install`.
+
+That's it. Your AI assistant can now manage issues in any repo. Head to the [Installation](/docs/installation) page for more options, or learn about [AI Agents](/docs/ai-skill) to understand how agent setup works.
 
 ## What you get
 
-- **AI Skill** — Natural language issue management via your coding assistant
+- **AI agent guidance** — Versioned natural language issue management via `issy learn`
 - **CLI** — Full terminal workflow for creating, listing, searching, and managing issues
 - **Web UI** — Local browser interface for browsing and filtering issues
 - **Roadmap Ordering** — Dependency-aware prioritization with fractional indexing
