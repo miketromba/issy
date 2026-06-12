@@ -8,6 +8,7 @@ import {
 	getBlockingIssues,
 	isIssueUnblocked,
 	parseDependencyIds,
+	reopenIssue,
 	updateIssue
 } from '../src/lib/index'
 import { setupTestDir } from './setup'
@@ -105,5 +106,43 @@ describe('Dependencies', () => {
 		const blocked = filterByQuery(all, 'is:blocked')
 
 		expect(blocked.map(i => i.id)).toEqual(['0003'])
+	})
+
+	test('createIssue rejects a blocked issue before its open dependency', async () => {
+		await expect(
+			createIssue({
+				title: 'Blocked too early',
+				order: 'a0V',
+				depends_on: '0002'
+			})
+		).rejects.toThrow('Issues must be placed after all open issues')
+	})
+
+	test('updateIssue rejects adding a dependency that appears later', async () => {
+		await expect(updateIssue('0001', { depends_on: '0002' })).rejects.toThrow(
+			'Issues must be placed after all open issues'
+		)
+	})
+
+	test('updateIssue rejects moving a dependency after its dependent issue', async () => {
+		await expect(updateIssue('0001', { order: 'a3' })).rejects.toThrow(
+			'Issues must be placed after all open issues'
+		)
+	})
+
+	test('closed dependencies do not constrain roadmap order', async () => {
+		await closeIssue('0002')
+
+		const issue = await updateIssue('0001', { depends_on: '0002' })
+
+		expect(issue.frontmatter.depends_on).toBe('0002')
+	})
+
+	test('reopenIssue rejects reopening after an issue that depends on it', async () => {
+		await closeIssue('0001')
+
+		await expect(reopenIssue('0001', 'a3')).rejects.toThrow(
+			'Issues must be placed after all open issues'
+		)
 	})
 })

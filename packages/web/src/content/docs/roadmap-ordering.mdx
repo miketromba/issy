@@ -20,6 +20,10 @@ depends_on: 0012, 0035
 
 An issue is unblocked when it is open and none of its existing dependencies are still open. Dependency IDs that do not match an existing issue are ignored.
 
+## Dependency integrity
+
+Roadmap order is validated against open dependencies. If issue B depends on issue A and both issues are open, issue A must appear before issue B. `issy create`, `issy update`, and `issy reopen` fail when the requested placement would put a blocked issue before one of its open blockers, or move a blocker after open issues that depend on it.
+
 ## Position flags
 
 When creating or reopening an issue while other open issues exist, you **must** specify where it fits in the roadmap:

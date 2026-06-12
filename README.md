@@ -172,6 +172,8 @@ Issues can declare blockers with `depends_on`:
 depends_on: 0012, 0035
 ```
 
+Roadmap placement is validated against open dependencies. An open issue must appear after every open issue it depends on, and `create`, `update`, or `reopen` fails if the requested position would put a blocked issue before one of its blockers.
+
 ### Hooks
 
 issy supports optional hook files in `.issy/` that inject context into stdout after successful operations. The file contents are printed directly, making them visible to AI agents in their command output.

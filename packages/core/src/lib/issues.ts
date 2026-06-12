@@ -325,6 +325,53 @@ export function isIssueUnblocked(issue: Issue, issues: Issue[]): boolean {
 	)
 }
 
+export function compareIssuesByRoadmapOrder(a: Issue, b: Issue): number {
+	const orderA = a.frontmatter.order
+	const orderB = b.frontmatter.order
+	if (orderA && orderB) {
+		if (orderA < orderB) return -1
+		if (orderA > orderB) return 1
+	}
+	if (orderA && !orderB) return -1
+	if (!orderA && orderB) return 1
+	return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+}
+
+export function validateRoadmapDependencyOrder(issues: Issue[]): void {
+	const openIssues = issues
+		.filter(issue => issue.frontmatter.status === 'open')
+		.sort(compareIssuesByRoadmapOrder)
+	const positionById = new Map(
+		openIssues.map((issue, index) => [issue.id, index])
+	)
+	const violations: string[] = []
+
+	for (const issue of openIssues) {
+		const issuePosition = positionById.get(issue.id)
+		if (issuePosition === undefined) continue
+
+		for (const dependency of getBlockingIssues(issue, issues)) {
+			const dependencyPosition = positionById.get(dependency.id)
+			if (
+				dependencyPosition === undefined ||
+				dependencyPosition < issuePosition
+			) {
+				continue
+			}
+
+			violations.push(`#${issue.id} depends on #${dependency.id}`)
+		}
+	}
+
+	if (violations.length > 0) {
+		throw new Error(
+			`Roadmap dependency order invalid: ${violations.join(
+				'; '
+			)}. Issues must be placed after all open issues they depend on.`
+		)
+	}
+}
+
 // --- File operations ---
 
 export function getIssueIdFromFilename(filename: string): string {
@@ -406,15 +453,7 @@ export async function getAllIssues(): Promise<Issue[]> {
 	}
 
 	// Default sort: roadmap order for issues that have it, then by ID
-	return issues.sort((a, b) => {
-		const orderA = a.frontmatter.order
-		const orderB = b.frontmatter.order
-		if (orderA && orderB)
-			return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
-		if (orderA && !orderB) return -1
-		if (!orderA && orderB) return 1
-		return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
-	})
+	return issues.sort(compareIssuesByRoadmapOrder)
 }
 
 // --- Roadmap ordering ---
@@ -552,15 +591,17 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
 	const body =
 		input.body ?? '\n## Details\n\n<!-- Add detailed description here -->\n'
 	const content = `${generateFrontmatter(frontmatter)}\n${body}\n`
-
-	await writeFile(join(getIssuesDir(), filename), content)
-
-	return {
+	const newIssue: Issue = {
 		id: issueNumber,
 		filename,
 		frontmatter,
 		content: `\n${body}\n`
 	}
+
+	validateRoadmapDependencyOrder([...existingIssues, newIssue])
+	await writeFile(join(getIssuesDir(), filename), content)
+
+	return newIssue
 }
 
 export async function updateIssue(
@@ -600,14 +641,27 @@ export async function updateIssue(
 		input.body !== undefined ? `\n${input.body}\n` : issue.content
 	const content = `${generateFrontmatter(updatedFrontmatter)}
 ${updatedContent}`
-
-	await writeFile(join(getIssuesDir(), issue.filename), content)
-
-	return {
+	const updatedIssue = {
 		...issue,
 		frontmatter: updatedFrontmatter,
 		content: updatedContent
 	}
+
+	if (
+		input.order !== undefined ||
+		input.depends_on !== undefined ||
+		input.status === 'open'
+	) {
+		validateRoadmapDependencyOrder(
+			allIssues.map(current =>
+				current.id === issue.id ? updatedIssue : current
+			)
+		)
+	}
+
+	await writeFile(join(getIssuesDir(), issue.filename), content)
+
+	return updatedIssue
 }
 
 export async function closeIssue(id: string): Promise<Issue> {

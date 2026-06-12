@@ -126,6 +126,8 @@ issy create --title "Fix crash" --body "## Problem\n\nApp crashes on startup." -
 | `--first` | Insert at beginning |
 | `--last` | Insert at end |
 
+If `--depends-on` names an open issue, the new issue must be placed after that blocker. `issy create` fails if the requested position would make the new issue appear before an open dependency.
+
 ### `issy update`
 
 Update an existing issue's properties.
@@ -138,6 +140,8 @@ issy update 0001 --labels "api, backend"
 issy update 0001 --depends-on 0002,0003
 issy update 0001 --body "New details"  # Replace body content
 ```
+
+Dependency order is also enforced when updating. Adding `--depends-on`, changing position, or reopening an issue fails if the resulting roadmap would place an open blocked issue before one of its open blockers.
 
 ### `issy close`
 

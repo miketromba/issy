@@ -3,7 +3,7 @@
  */
 
 import Fuse, { type IFuseOptions } from 'fuse.js'
-import { isIssueUnblocked } from './issues'
+import { compareIssuesByRoadmapOrder, isIssueUnblocked } from './issues'
 import { parseQuery } from './query-parser'
 import type { Issue, IssueFilters } from './types'
 
@@ -135,15 +135,7 @@ function sortIssues(issues: Issue[], sortBy: string): void {
 	const sortOption = sortBy.toLowerCase()
 
 	if (sortOption === 'roadmap') {
-		issues.sort((a, b) => {
-			const orderA = a.frontmatter.order
-			const orderB = b.frontmatter.order
-			if (orderA && orderB)
-				return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
-			if (orderA && !orderB) return -1
-			if (!orderA && orderB) return 1
-			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
-		})
+		issues.sort(compareIssuesByRoadmapOrder)
 	} else if (sortOption === 'priority') {
 		// Sort by priority (high → medium → low), then by ID (newest first)
 		const priorityOrder: Record<string, number> = {
@@ -204,15 +196,7 @@ function sortIssues(issues: Issue[], sortBy: string): void {
 		issues.sort((a, b) => b.id.localeCompare(a.id))
 	} else {
 		// Invalid sort option - default to roadmap order
-		issues.sort((a, b) => {
-			const orderA = a.frontmatter.order
-			const orderB = b.frontmatter.order
-			if (orderA && orderB)
-				return orderA < orderB ? -1 : orderA > orderB ? 1 : 0
-			if (orderA && !orderB) return -1
-			if (!orderA && orderB) return 1
-			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0
-		})
+		issues.sort(compareIssuesByRoadmapOrder)
 	}
 }
 

@@ -14,6 +14,7 @@ export { formatDisplayDate, formatFullDate } from './formatDate'
 export {
 	autoDetectIssuesDir,
 	closeIssue,
+	compareIssuesByRoadmapOrder,
 	computeOrderKey,
 	createIssue,
 	createSlug,
@@ -52,7 +53,8 @@ export {
 	resolveIssyDir,
 	setIssuesDir,
 	setIssyDir,
-	updateIssue
+	updateIssue,
+	validateRoadmapDependencyOrder
 } from './issues'
 // Query parser
 export type { ParsedQuery } from './query-parser'

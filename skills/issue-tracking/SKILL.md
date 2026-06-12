@@ -81,6 +81,7 @@ issy maintains a **roadmap** — a strict, intentional ordering of all open issu
 - `issy next` returns the first open issue in roadmap order — the next unit of work.
 - `issy list` sorts by roadmap order by default.
 - Use `depends_on` for explicit blockers when an issue cannot start until other issues are closed. Missing or malformed dependency IDs are ignored.
+- Roadmap placement is enforced against open dependencies: an open issue cannot be placed before an open issue it depends on, and a blocker cannot be moved after open issues that depend on it.
 - `issy list` shows a compact `Blk` column: `-` means unblocked, otherwise the number of currently open blockers.
 - `issy list --unblocked` shows only open issues with no open blockers.
 

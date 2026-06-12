@@ -108,6 +108,8 @@ depends_on: 0012, 0035
 
 `issy list` shows a compact `Blk` column with the count of currently open blockers. `-` means the issue is unblocked. Dependency IDs that do not match an existing issue are ignored.
 
+When a dependency is open, roadmap order is enforced: the dependent issue must be placed after that blocker. Creating, updating, or reopening an issue fails if the resulting roadmap would put an open blocked issue before one of its open dependencies.
+
 ## Body content
 
 Everything after the frontmatter closing `---` is the issue body. Write standard markdown — headings, lists, code blocks, links, etc.

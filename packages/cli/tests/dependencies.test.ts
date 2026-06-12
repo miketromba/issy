@@ -91,6 +91,67 @@ describe('dependency CLI behavior', () => {
 		expect(unblockedList).toContain('Feature')
 	})
 
+	test('create rejects depends-on placement before an open blocker', async () => {
+		await expectCli(['create', '--title', 'Foundation', '--last'])
+		await expectCli(['create', '--title', 'API', '--last'])
+
+		const result = await runCli([
+			'create',
+			'--title',
+			'Blocked too early',
+			'--depends-on',
+			'0002',
+			'--first'
+		])
+
+		expect(result.exitCode).toBe(1)
+		expect(result.stderr).toContain(
+			'Issues must be placed after all open issues'
+		)
+
+		const listOutput = await expectCli(['list'])
+		expect(listOutput).not.toContain('Blocked too early')
+	})
+
+	test('update rejects moving a blocker after an issue that depends on it', async () => {
+		await expectCli(['create', '--title', 'Foundation', '--last'])
+		await expectCli([
+			'create',
+			'--title',
+			'Feature',
+			'--depends-on',
+			'0001',
+			'--last'
+		])
+
+		const result = await runCli(['update', '0001', '--last'])
+
+		expect(result.exitCode).toBe(1)
+		expect(result.stderr).toContain(
+			'Issues must be placed after all open issues'
+		)
+	})
+
+	test('reopen rejects placement after an issue that depends on it', async () => {
+		await expectCli(['create', '--title', 'Foundation', '--last'])
+		await expectCli([
+			'create',
+			'--title',
+			'Feature',
+			'--depends-on',
+			'0001',
+			'--last'
+		])
+		await expectCli(['close', '0001'])
+
+		const result = await runCli(['reopen', '0001', '--last'])
+
+		expect(result.exitCode).toBe(1)
+		expect(result.stderr).toContain(
+			'Issues must be placed after all open issues'
+		)
+	})
+
 	test('list --all still includes closed issues', async () => {
 		await expectCli(['create', '--title', 'Closed issue', '--last'])
 		await expectCli(['close', '0001'])
