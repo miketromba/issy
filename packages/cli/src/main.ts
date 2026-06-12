@@ -17,11 +17,24 @@ import {
 	parseFrontmatter,
 	resolveIssyDir
 } from '@miketromba/issy-core'
+import { getLearnOutput } from './learn'
 
 const args = process.argv.slice(2)
 
 if (args[0] === '--version' || args[0] === '-v') {
 	console.log(`issy v${process.env.ISSY_PKG_VERSION || 'unknown'}`)
+	process.exit(0)
+}
+
+if (args[0] === 'learn') {
+	try {
+		process.stdout.write(getLearnOutput(args.slice(1)))
+	} catch (error) {
+		console.error(
+			error instanceof Error ? error.message : 'Failed to learn'
+		)
+		process.exit(1)
+	}
 	process.exit(0)
 }
 
@@ -159,12 +172,12 @@ function skill(): never {
 Usage: issy skill <command>
 
 Commands:
-  install    Install the issy skill for your AI coding assistant
+  install    Install the issy bootstrap skill for your AI coding assistant
 `)
 		process.exit(subcommand ? 1 : 0)
 	}
 
-	console.log('Installing issy skill via skills CLI...\n')
+	console.log('Installing issy bootstrap skill via skills CLI...\n')
 	try {
 		execSync('npx skills add miketromba/issy', { stdio: 'inherit' })
 	} catch {

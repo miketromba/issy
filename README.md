@@ -18,7 +18,7 @@
 
 ## How It Works
 
-issy gives AI coding assistants a skill for managing issues. Just talk naturally:
+issy gives AI coding assistants versioned instructions for managing issues. Add a small AGENTS.md rule or install the bootstrap skill, then just talk naturally:
 
 > "Create a bug for the login redirect issue, high priority"
 
@@ -28,19 +28,31 @@ issy gives AI coding assistants a skill for managing issues. Just talk naturally
 
 The assistant creates, searches, updates, and closes issues for you. Issues are stored as markdown files in `.issy/issues/` — readable, diffable, and committed with your code.
 
-## Install the Skill
+## Teach Your AI Assistant
+
+```bash
+issy learn
+```
+
+`issy learn` prints the canonical AI-agent reference for your installed issy version. To make agents run it automatically, add this to AGENTS.md:
+
+```md
+When the task involves creating, reading, updating, listing, searching, prioritizing, closing, reopening, or choosing project issues, tasks, bugs, improvements, or roadmap work, run `issy learn` first and follow its guidance.
+```
+
+You can also install the lightweight bootstrap skill:
 
 ```bash
 issy skill install
 ```
 
-Or, if you haven't installed `issy` yet:
+Or, without running the issy wrapper:
 
 ```bash
 npx skills add miketromba/issy
 ```
 
-That's it. Your AI assistant can now manage issues in any repo.
+The skill contains only the relevance rule and tells compatible assistants to run `issy learn`, keeping the real agent guidance in one versioned place. The `issy` CLI still needs to be available when the assistant runs `issy learn`.
 
 ## Why Markdown?
 
@@ -80,6 +92,7 @@ issy                          # Start the web UI
 issy list                     # List open issues (roadmap order)
 issy next                     # Show next issue to work on
 issy create --title "Bug"     # Create an issue
+issy learn                    # Print AI-agent instructions
 ```
 
 ### Repository installation
@@ -133,7 +146,9 @@ issy update 0001 --before 0003            # Reposition in roadmap
 issy update 0001 --body "New details"     # Replace body content
 issy close 0001               # Close issue
 issy reopen 0001 --after 0004 # Reopen and place in roadmap
-issy skill install            # Install the AI skill
+issy learn                    # Print compact AI-agent instructions
+issy learn roadmap            # Print focused topic instructions
+issy skill install            # Install the AI bootstrap skill
 issy migrate                  # Migrate from .issues/ to .issy/
 issy --version                # Check version
 ```

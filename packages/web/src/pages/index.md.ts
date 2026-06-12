@@ -26,7 +26,7 @@ Your AI assistant creates, searches, updates, and closes issues for you.
 
 ## Features
 
-- **AI Skill** — Natural language issue management via your coding assistant
+- **AI agent guidance** — Versioned natural language issue management via \`issy learn\`
 - **CLI** — Full terminal workflow for creating, listing, searching, and managing issues
 - **Web UI** — Local browser interface for browsing and filtering issues
 
@@ -38,11 +38,13 @@ Install issy:
 npm install issy --global
 \`\`\`
 
-Install the AI skill:
+Teach your AI assistant:
 
 \`\`\`bash
-issy skill install
+issy learn
 \`\`\`
+
+Add the AGENTS.md snippet from the docs, or install the bootstrap skill with \`issy skill install\`.
 
 Start tracking issues:
 

@@ -10,6 +10,7 @@
  *   issy close <id>
  *   issy reopen <id> [--before <id> | --after <id>]
  *   issy next
+ *   issy learn [topic]
  */
 
 import { parseArgs } from 'node:util'
@@ -426,6 +427,10 @@ Commands:
 
   next                    Show the next issue to work on
 
+  learn [topic]           Print AI-agent instructions for this issy version
+    --all                 Print the full reference
+    --list                List focused topics
+
   create                  Create a new issue
     --title, -t <t>       Issue title
     --body, -b <b>        Markdown body content
@@ -458,12 +463,14 @@ Commands:
     --first               Insert at the beginning of the roadmap
     --last                Insert at the end of the roadmap
 
-  skill install           Install the issy skill for your AI coding assistant
+  skill install           Install the issy bootstrap skill
 
 Examples:
   issy list
   issy list --priority high --type bug
   issy next
+  issy learn
+  issy learn roadmap
   issy read 0001
   issy create --title "Fix login bug" --type bug --priority high --after 0002
   issy create --title "Add dark mode" --last
