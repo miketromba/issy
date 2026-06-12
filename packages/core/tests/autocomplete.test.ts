@@ -17,6 +17,8 @@ describe('Autocomplete', () => {
 
 		expect(suggestions.some(s => s.text === 'open')).toBe(true)
 		expect(suggestions.some(s => s.text === 'closed')).toBe(true)
+		expect(suggestions.some(s => s.text === 'unblocked')).toBe(true)
+		expect(suggestions.some(s => s.text === 'blocked')).toBe(true)
 	})
 
 	test('getQuerySuggestions suggests values for priority:', () => {

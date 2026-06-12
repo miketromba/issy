@@ -37,6 +37,8 @@ The search bar supports issy's query language for filtering:
 ```
 is:open                      # Open issues only
 is:closed                    # Closed issues only
+is:unblocked                 # Open issues with no open blockers
+is:blocked                   # Open issues with open blockers
 priority:high                # High priority
 type:bug                     # Bugs only
 scope:large                  # Large scope
@@ -47,6 +49,7 @@ Combine filters:
 
 ```
 is:open priority:high type:bug
+is:unblocked priority:high
 ```
 
 Free text search also works — just type keywords and issy will fuzzy-match against issue titles and content.

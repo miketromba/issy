@@ -236,12 +236,93 @@ export function generateFrontmatter(data: IssueFrontmatter): string {
 	if (data.order) {
 		lines.push(`order: ${data.order}`)
 	}
+	if (data.depends_on) {
+		lines.push(`depends_on: ${data.depends_on}`)
+	}
 	lines.push(`created: ${data.created}`)
 	if (data.updated) {
 		lines.push(`updated: ${data.updated}`)
 	}
 	lines.push('---')
 	return lines.join('\n')
+}
+
+// --- Dependencies ---
+
+export function parseDependencyIds(dependsOn?: string): string[] {
+	if (!dependsOn) return []
+
+	const seen = new Set<string>()
+	const ids: string[] = []
+
+	for (const token of dependsOn.split(/[,\s]+/)) {
+		const value = token
+			.trim()
+			.replace(/^['"]+|['"]+$/g, '')
+			.replace(/^#/, '')
+		if (!/^\d+$/.test(value)) continue
+
+		const id = value.padStart(4, '0')
+		if (seen.has(id)) continue
+
+		seen.add(id)
+		ids.push(id)
+	}
+
+	return ids
+}
+
+export function formatDependencyIds(dependsOn?: string): string {
+	return parseDependencyIds(dependsOn).join(', ')
+}
+
+export function filterExistingDependencyIds(
+	dependsOn: string | undefined,
+	issues: Issue[],
+	excludeId?: string
+): string[] {
+	const existingIds = new Set(issues.map(issue => issue.id))
+	const excludedId = excludeId?.padStart(4, '0')
+
+	return parseDependencyIds(dependsOn).filter(
+		id => existingIds.has(id) && id !== excludedId
+	)
+}
+
+export function formatExistingDependencyIds(
+	dependsOn: string | undefined,
+	issues: Issue[],
+	excludeId?: string
+): string {
+	return filterExistingDependencyIds(dependsOn, issues, excludeId).join(', ')
+}
+
+export function getDependencyIssues(issue: Issue, issues: Issue[]): Issue[] {
+	const dependencyIds = filterExistingDependencyIds(
+		issue.frontmatter.depends_on,
+		issues,
+		issue.id
+	)
+	if (dependencyIds.length === 0) return []
+
+	const issueById = new Map(issues.map(i => [i.id, i]))
+
+	return dependencyIds
+		.map(id => issueById.get(id))
+		.filter((dependency): dependency is Issue => Boolean(dependency))
+}
+
+export function getBlockingIssues(issue: Issue, issues: Issue[]): Issue[] {
+	return getDependencyIssues(issue, issues).filter(
+		dependency => dependency.frontmatter.status === 'open'
+	)
+}
+
+export function isIssueUnblocked(issue: Issue, issues: Issue[]): boolean {
+	return (
+		issue.frontmatter.status === 'open' &&
+		getBlockingIssues(issue, issues).length === 0
+	)
 }
 
 // --- File operations ---
@@ -449,6 +530,12 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
 	const issueNumber = await getNextIssueNumber()
 	const slug = createSlug(input.title)
 	const filename = `${issueNumber}-${slug}.md`
+	const existingIssues = await getAllIssues()
+	const dependsOn = formatExistingDependencyIds(
+		input.depends_on,
+		existingIssues,
+		issueNumber
+	)
 
 	const frontmatter: IssueFrontmatter = {
 		title: input.title,
@@ -458,6 +545,7 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
 		labels: input.labels || undefined,
 		status: 'open',
 		order: input.order || undefined,
+		depends_on: dependsOn || undefined,
 		created: formatDate()
 	}
 
@@ -485,6 +573,12 @@ export async function updateIssue(
 		throw new Error(`Issue not found: ${id}`)
 	}
 
+	const allIssues = await getAllIssues()
+	const dependsOn =
+		input.depends_on !== undefined
+			? formatExistingDependencyIds(input.depends_on, allIssues, issue.id)
+			: undefined
+
 	const updatedFrontmatter: IssueFrontmatter = {
 		...issue.frontmatter,
 		...(input.title && { title: input.title }),
@@ -496,6 +590,9 @@ export async function updateIssue(
 		}),
 		...(input.status && { status: input.status }),
 		...(input.order && { order: input.order }),
+		...(input.depends_on !== undefined && {
+			depends_on: dependsOn || undefined
+		}),
 		updated: formatDate()
 	}
 

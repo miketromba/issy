@@ -31,6 +31,7 @@ scope: medium
 type: bug
 status: open
 order: a0
+depends_on: 0012, 0035
 created: 2025-01-15T10:30:00
 ---
 
@@ -62,6 +63,7 @@ User should land on dashboard after successful authentication.
 | `created` | Auto | ISO 8601 | Creation timestamp |
 | `scope` | No | `small`, `medium`, `large` | Estimated effort |
 | `labels` | No | comma-separated | Custom labels |
+| `depends_on` | No | comma-separated IDs | Issues that block this issue |
 
 ## Field details
 
@@ -95,6 +97,16 @@ labels: frontend, auth, critical
 ### Order
 
 The `order` field is a fractional index key managed by issy. It determines the issue's position in the [roadmap](/docs/roadmap-ordering). You should not edit this field manually.
+
+### Dependencies
+
+Use `depends_on` to list issues that must be closed before an open issue is ready to work on:
+
+```yaml
+depends_on: 0012, 0035
+```
+
+`issy list` shows a compact `Blk` column with the count of currently open blockers. `-` means the issue is unblocked. Dependency IDs that do not match an existing issue are ignored.
 
 ## Body content
 

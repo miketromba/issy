@@ -32,6 +32,7 @@ List issues in roadmap order (default).
 ```bash
 issy list                     # Open issues only
 issy list --all               # Include closed issues
+issy list --unblocked         # Open issues with no open blockers
 issy list --priority high     # Filter by priority
 issy list --scope small       # Filter by scope
 issy list --type bug          # Filter by type
@@ -45,9 +46,12 @@ issy list --sort id           # Sort by ID
 
 | Flag | Values |
 |------|--------|
+| `--unblocked` | Open issues with no open blockers |
 | `--priority` | `high`, `medium`, `low` |
 | `--scope` | `small`, `medium`, `large` |
 | `--type` | `bug`, `improvement` |
+
+The list output includes a compact `Blk` column. `-` means the issue is unblocked; otherwise the value is the number of currently open blockers.
 
 **Sort options:**
 
@@ -91,6 +95,7 @@ Create a new issue. When other open issues exist, you **must** specify a positio
 ```bash
 issy create --title "Fix login bug" --type bug --priority high --after 0002
 issy create --title "Add dark mode" --type improvement --last --labels "ui, frontend"
+issy create --title "Add export" --depends-on 0001,0002 --last
 issy create --title "Urgent fix" --first
 issy create --title "Fix crash" --body "## Problem\n\nApp crashes on startup." --last
 ```
@@ -109,6 +114,7 @@ issy create --title "Fix crash" --body "## Problem\n\nApp crashes on startup." -
 | `--priority` | `high`, `medium`, or `low` |
 | `--scope` | `small`, `medium`, or `large` |
 | `--labels` | Comma-separated labels |
+| `--depends-on` | Comma-separated blocking issue IDs |
 | `--body` | Issue body content (markdown) |
 
 **Position flags** (required when open issues exist):
@@ -129,6 +135,7 @@ issy update 0001 --priority low
 issy update 0001 --after 0003          # Reposition in roadmap
 issy update 0001 --first               # Move to top
 issy update 0001 --labels "api, backend"
+issy update 0001 --depends-on 0002,0003
 issy update 0001 --body "New details"  # Replace body content
 ```
 

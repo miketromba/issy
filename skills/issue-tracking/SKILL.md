@@ -80,6 +80,9 @@ issy maintains a **roadmap** — a strict, intentional ordering of all open issu
 - When **updating** an issue: optionally provide a position flag to reposition it in the roadmap.
 - `issy next` returns the first open issue in roadmap order — the next unit of work.
 - `issy list` sorts by roadmap order by default.
+- Use `depends_on` for explicit blockers when an issue cannot start until other issues are closed. Missing or malformed dependency IDs are ignored.
+- `issy list` shows a compact `Blk` column: `-` means unblocked, otherwise the number of currently open blockers.
+- `issy list --unblocked` shows only open issues with no open blockers.
 
 ### Choosing placement
 
@@ -98,6 +101,7 @@ Use the `issy` CLI. If not installed, install it globally using the project's pa
 # List issues (roadmap order by default)
 issy list                    # Open issues only
 issy list --all              # Include closed
+issy list --unblocked        # Open issues with no open blockers
 issy list --priority high    # Filter: high, medium, low
 issy list --scope small      # Filter: small, medium, large
 issy list --type bug         # Filter: bug, improvement
@@ -117,6 +121,7 @@ issy next
 # Create issue (position flag required when open issues exist)
 issy create --title "Fix login bug" --type bug --priority high --after 0002
 issy create --title "Add dark mode" --type improvement --last --labels "ui, frontend"
+issy create --title "Add export" --depends-on 0001,0002 --last
 issy create --title "Urgent fix" --first
 issy create --title "Fix crash" --body "## Problem\n\nApp crashes on startup." --last
 
@@ -125,6 +130,7 @@ issy update <id> --priority low
 issy update <id> --after 0003
 issy update <id> --first
 issy update <id> --labels "api, backend"
+issy update <id> --depends-on 0001,0003
 issy update <id> --body "## Problem\n\nUpdated description of the issue."
 
 # Close issue
@@ -182,6 +188,7 @@ Keep it brief—just capture what someone revisiting this issue would want to kn
 | labels | No | comma-separated strings |
 | status | Yes | `open`, `closed` |
 | order | Auto | fractional index key (managed by issy) |
+| depends_on | No | comma-separated blocking issue IDs |
 
 ## After Mutations
 

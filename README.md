@@ -78,6 +78,7 @@ Once installed globally, you can run commands from your terminal:
 ```bash
 issy                          # Start the web UI
 issy list                     # List open issues (roadmap order)
+issy list --unblocked         # List open issues with no open blockers
 issy next                     # Show next issue to work on
 issy create --title "Bug"     # Create an issue
 ```
@@ -124,12 +125,15 @@ Opens a local read-only UI at `http://localhost:1554` for browsing issues.
 issy init                     # Create .issy/issues/ directory
 issy init --seed              # Create with a welcome issue
 issy list                     # List open issues (roadmap order)
+issy list --unblocked         # List open issues with no open blockers
 issy next                     # Show next issue to work on
 issy search "auth"            # Fuzzy search
 issy read 0001                # View issue
 issy create --title "Bug" --after 0002    # Create issue after #0002
+issy create --title "Feature" --depends-on 0012,0035 --last  # Blocked by issues
 issy create --title "Bug" --body "Details here" --last  # Create with body content
 issy update 0001 --before 0003            # Reposition in roadmap
+issy update 0001 --depends-on 0012,0035   # Replace blockers
 issy update 0001 --body "New details"     # Replace body content
 issy close 0001               # Close issue
 issy reopen 0001 --after 0004 # Reopen and place in roadmap
@@ -158,6 +162,14 @@ issy create --title "Backlog item" --last       # Insert at the end
 ```bash
 issy list --sort priority     # Sort by priority instead
 issy list --sort created      # Sort by creation date
+```
+
+The `Blk` column in `issy list` shows the count of currently open blockers. `-` means the issue is unblocked. Use `issy list --unblocked` to show only open issues that have no open blockers. Dependency IDs that do not match an existing issue are ignored.
+
+Issues can declare blockers with `depends_on`:
+
+```yaml
+depends_on: 0012, 0035
 ```
 
 ### Hooks
@@ -211,6 +223,7 @@ scope: medium
 type: bug
 status: open
 order: a0
+depends_on: 0012, 0035
 created: 2025-01-15T10:30:00
 ---
 
@@ -228,6 +241,7 @@ session isn't established, causing a redirect loop.
 | `status` | `open`, `closed` |
 | `labels` | comma-separated (optional) |
 | `order` | fractional index key (managed by issy) |
+| `depends_on` | comma-separated blocking issue IDs (optional) |
 
 ## Configuration
 

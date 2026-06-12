@@ -3,6 +3,7 @@
  */
 
 import Fuse, { type IFuseOptions } from 'fuse.js'
+import { isIssueUnblocked } from './issues'
 import { parseQuery } from './query-parser'
 import type { Issue, IssueFilters } from './types'
 
@@ -220,6 +221,7 @@ function sortIssues(issues: Issue[], sortBy: string): void {
  *
  * Supports the following qualifiers:
  * - `is:open` / `is:closed` - filters by status
+ * - `is:unblocked` / `is:blocked` - filters open issues by blocker state
  * - `priority:high` / `priority:medium` / `priority:low` - filters by priority
  * - `type:bug` / `type:improvement` - filters by type
  * - `label:x` - filters by label (case-insensitive partial match)
@@ -267,12 +269,23 @@ export function filterByQuery(issues: Issue[], query: string): Issue[] {
 
 	// First, filter by qualifiers
 	let result = issues.filter(issue => {
-		// is: qualifier (maps to status)
+		// is: qualifier (maps to status or dependency readiness)
 		if (parsed.qualifiers.is) {
 			const statusValue = parsed.qualifiers.is.toLowerCase()
-			// Only filter if value is valid (open or closed)
+			// Only filter if value is valid
 			if (statusValue === 'open' || statusValue === 'closed') {
 				if (issue.frontmatter.status !== statusValue) {
+					return false
+				}
+			} else if (statusValue === 'unblocked') {
+				if (!isIssueUnblocked(issue, issues)) {
+					return false
+				}
+			} else if (statusValue === 'blocked') {
+				if (
+					issue.frontmatter.status !== 'open' ||
+					isIssueUnblocked(issue, issues)
+				) {
 					return false
 				}
 			}
