@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { generateFrontmatter, parseFrontmatter } from '../src/lib/index'
 import type { IssueFrontmatter } from '../src/lib/index'
+import { generateFrontmatter, parseFrontmatter } from '../src/lib/index'
 
 describe('Frontmatter', () => {
 	test('parseFrontmatter extracts order field', () => {

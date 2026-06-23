@@ -119,9 +119,9 @@ describe('Dependencies', () => {
 	})
 
 	test('updateIssue rejects adding a dependency that appears later', async () => {
-		await expect(updateIssue('0001', { depends_on: '0002' })).rejects.toThrow(
-			'Issues must be placed after all open issues'
-		)
+		await expect(
+			updateIssue('0001', { depends_on: '0002' })
+		).rejects.toThrow('Issues must be placed after all open issues')
 	})
 
 	test('updateIssue rejects moving a dependency after its dependent issue', async () => {
