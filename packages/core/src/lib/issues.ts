@@ -173,6 +173,27 @@ export function hasLegacyIssuesDir(): string | null {
 
 // --- Frontmatter ---
 
+/**
+ * The keys `generateFrontmatter` emits explicitly, in their own order.
+ *
+ * Everything else in the frontmatter object is a caller's own annotation and is
+ * re-emitted verbatim after these. Kept as one named set rather than repeated in
+ * the emit loop, because a key added to the interface and not added here would be
+ * written twice — once by its own `lines.push` and once by the catch-all.
+ */
+const KNOWN_FRONTMATTER_KEYS = new Set([
+	'title',
+	'priority',
+	'scope',
+	'type',
+	'labels',
+	'status',
+	'order',
+	'depends_on',
+	'created',
+	'updated'
+])
+
 export function parseFrontmatter(content: string): {
 	frontmatter: Partial<IssueFrontmatter>
 	body: string
@@ -190,7 +211,13 @@ export function parseFrontmatter(content: string): {
 		if (colonIdx > 0) {
 			const key = line.slice(0, colonIdx).trim()
 			const rawValue = line.slice(colonIdx + 1).trim()
-			const value = key === 'title' ? yamlUnquote(rawValue) : rawValue
+			//: Unquote every value, not only `title`. Asymmetric quoting was the second
+			//: half of the round-trip bug: `generateFrontmatter` quotes any value that
+			//: needs it, so a key whose value was quoted on write and *not* unquoted on
+			//: read came back with its quotes as part of the value, and the next write
+			//: escaped them into the value for real. The known fields are enums and dates
+			//: that are never quoted, so this is a no-op for all of them.
+			const value = yamlUnquote(rawValue)
 			;(frontmatter as Record<string, string>)[key] = value
 		}
 	}
@@ -242,6 +269,20 @@ export function generateFrontmatter(data: IssueFrontmatter): string {
 	lines.push(`created: ${data.created}`)
 	if (data.updated) {
 		lines.push(`updated: ${data.updated}`)
+	}
+	//: **Re-emit every key issy does not know about.** The parser has always kept
+	//: them, and `updateIssue` spreads the parsed frontmatter into the object it
+	//: writes, so an unknown key reaches this function intact — it was only ever
+	//: lost here, at the emit step, where the field list was hard-coded. That made
+	//: annotation look supported until the first status change deleted it.
+	//:
+	//: Emitted last and in insertion order so the known fields keep their existing
+	//: positions: a reordering diff on every issue file would be indistinguishable
+	//: from a content change to anything reviewing them.
+	for (const [key, value] of Object.entries(data)) {
+		if (!KNOWN_FRONTMATTER_KEYS.has(key) && value !== undefined) {
+			lines.push(`${key}: ${yamlQuote(String(value))}`)
+		}
 	}
 	lines.push('---')
 	return lines.join('\n')

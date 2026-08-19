@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { generateFrontmatter, parseFrontmatter } from '../src/lib/index'
 import type { IssueFrontmatter } from '../src/lib/index'
+import { generateFrontmatter, parseFrontmatter } from '../src/lib/index'
 
 describe('Frontmatter', () => {
 	test('parseFrontmatter extracts order field', () => {
@@ -225,5 +225,84 @@ describe('Frontmatter', () => {
 
 		const { frontmatter } = parseFrontmatter(content)
 		expect(frontmatter.title).toBe('Fix: old style colon')
+	})
+})
+
+describe('Frontmatter — unknown keys survive a write-back', () => {
+	const base: IssueFrontmatter = {
+		title: 'Test',
+		priority: 'high',
+		type: 'bug',
+		status: 'open',
+		created: '2026-01-01T00:00:00'
+	}
+
+	test('generateFrontmatter re-emits keys it does not know', () => {
+		const out = generateFrontmatter({
+			...base,
+			source: 'docs/architecture.md:25',
+			confidence: 'candidate',
+			register_id: 'A01'
+		})
+		// A `file:line` citation contains a colon, so it must be quoted — bare `a:b`
+		// is ambiguous YAML. This is the common case for a source reference, and the
+		// round-trip test below is what proves the quoting is lossless.
+		expect(out).toContain('source: "docs/architecture.md:25"')
+		expect(out).toContain('confidence: candidate')
+		expect(out).toContain('register_id: A01')
+	})
+
+	test('known keys keep their existing order and are not duplicated', () => {
+		const out = generateFrontmatter({ ...base, custom: 'x' })
+		const keys = out
+			.split('\n')
+			.filter(l => l.includes(':') && l !== '---')
+			.map(l => l.slice(0, l.indexOf(':')))
+		expect(keys).toEqual([
+			'title',
+			'priority',
+			'type',
+			'status',
+			'created',
+			'custom'
+		])
+		// A key emitted twice would mean the catch-all and the explicit push overlap.
+		expect(new Set(keys).size).toBe(keys.length)
+	})
+
+	test('an unknown key round-trips through parse and generate unchanged', () => {
+		const original = generateFrontmatter({
+			...base,
+			confidence: 'core',
+			obligation: 'A lease is the sole mechanism: nothing else may claim'
+		})
+		const { frontmatter } = parseFrontmatter(`${original}\n\nBody\n`)
+		expect(frontmatter.confidence).toBe('core')
+		// The value contains a colon, so generate quotes it. Parse must unquote it,
+		// or the next write escapes the quotes into the value itself.
+		expect(frontmatter.obligation).toBe(
+			'A lease is the sole mechanism: nothing else may claim'
+		)
+
+		// The fixed point: a second round trip must not drift.
+		const again = generateFrontmatter(frontmatter as IssueFrontmatter)
+		expect(again).toBe(original)
+	})
+
+	test('a quoted title still round-trips, the case that already worked', () => {
+		const original = generateFrontmatter({
+			...base,
+			title: 'Fix: the thing, properly'
+		})
+		const { frontmatter } = parseFrontmatter(`${original}\n\nBody\n`)
+		expect(frontmatter.title).toBe('Fix: the thing, properly')
+		expect(generateFrontmatter(frontmatter as IssueFrontmatter)).toBe(
+			original
+		)
+	})
+
+	test('an undefined unknown value is omitted rather than written as undefined', () => {
+		const out = generateFrontmatter({ ...base, maybe: undefined })
+		expect(out).not.toContain('maybe')
 	})
 })
