@@ -13,6 +13,20 @@ export interface IssueFrontmatter {
 	depends_on?: string
 	created: string
 	updated?: string
+	/**
+	 * Any other frontmatter key the file carries.
+	 *
+	 * issy's parser has always kept unknown keys — it reads every `key: value` line
+	 * into the frontmatter object — but `generateFrontmatter` only ever emitted the
+	 * fields named above, so the first `issy update` or `issy close` silently deleted
+	 * them. That made the read behaviour a trap rather than a feature: a project could
+	 * annotate its issues, see the annotations survive `issy read`, and lose them on
+	 * the next status change with no error and no warning.
+	 *
+	 * The index signature makes those keys type-legal so they can be round-tripped
+	 * deliberately instead of by accident.
+	 */
+	[key: string]: string | undefined
 }
 
 export interface Issue {
