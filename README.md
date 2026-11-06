@@ -126,7 +126,7 @@ You can continue to use your global installation to run commands. Global `issy` 
 issy
 ```
 
-Opens a local read-only UI at `http://localhost:1554` for browsing issues.
+Opens a local read-only UI at `http://localhost:1554` for browsing issues. It listens only on your own machine (`127.0.0.1`) unless you set `ISSUES_HOST`.
 
 <p align="center">
   <img src="assets/web-ui-screenshot.png" alt="issy web UI" width="800" />
@@ -265,6 +265,7 @@ session isn't established, causing a redirect loop.
 |----------|-------------|---------|
 | `ISSY_DIR` | Issy directory path | `./.issy` |
 | `ISSUES_PORT` | UI server port | `1554` |
+| `ISSUES_HOST` | UI server host (e.g. `0.0.0.0` to allow other machines) | `127.0.0.1` |
 
 <details>
 <summary><strong>Development</strong></summary>

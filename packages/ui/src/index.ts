@@ -21,6 +21,7 @@ import {
 	updateIssue
 } from '@miketromba/issy-core'
 import { serve } from 'bun'
+import { resolveHost, resolvePort } from './config'
 import index from './index.html'
 
 // Initialize issues directory with smart resolution:
@@ -29,10 +30,10 @@ import index from './index.html'
 // 3. Fall back to cwd/.issues
 resolveIssuesDir()
 
-const PORT = Number(process.env.ISSUES_PORT || process.env.PORT || 1554)
-
 const server = serve({
-	port: PORT,
+	port: resolvePort(),
+	// Loopback unless ISSUES_HOST says otherwise; Bun's default is every interface
+	hostname: resolveHost(),
 	routes: {
 		// API: List all issues with optional filtering and search
 		// Supports both legacy filters (status, priority, type, search) and

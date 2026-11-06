@@ -12,6 +12,7 @@ issy is designed to work with zero configuration. For cases where you need to cu
 |----------|-------------|---------|
 | `ISSY_DIR` | Path to the issy directory | `./.issy` |
 | `ISSUES_PORT` | Port for the web UI server | `1554` |
+| `ISSUES_HOST` | Host the web UI server listens on | `127.0.0.1` |
 
 ### ISSY_DIR
 
@@ -32,6 +33,16 @@ ISSUES_PORT=3000 issy
 ```
 
 The web UI will then be available at `http://localhost:3000`.
+
+### ISSUES_HOST
+
+The web UI listens on `127.0.0.1` by default, so only your own machine can reach it. To open it from somewhere else, such as from outside a container, set the host it listens on:
+
+```bash
+ISSUES_HOST=0.0.0.0 issy
+```
+
+Anyone who can reach that address can then read your issues, so only do this on a network you trust.
 
 ## Directory resolution
 
