@@ -14,7 +14,7 @@ workflows:
 dependencies:
     'actions/checkout@v4.4.0':
         ref: 'v4.4.0'
-        commit: 'sha1-11d5960a326750d5838078e36cf38b85af677262'
+        commit: 'sha1-08c6903cd8c0fde910a37f88322edcfb5dd907a8'
         owner_id: 44036562
         repo_id: 197814629
     'actions/setup-node@v4.4.0':
