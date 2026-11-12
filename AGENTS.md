@@ -12,6 +12,10 @@ When the user says "ship", that means: **push to remote, and, if there are user-
 
 The `v*` tag triggers `.github/workflows/publish.yml` which lints, builds, tests, publishes all three packages to npm with provenance, and creates a GitHub Release.
 
+## GitHub Actions
+
+Every action the workflows use is pinned to a commit in `.github/workflows/actions.lock`, and CI's `verify-lockfile` job fails when the lockfile and the workflows disagree. After adding, removing or bumping an action (or adding a workflow), run `gh actions-lock` (GitHub's extension, `gh extension install github/gh-actions-lock`) and commit the updated lockfile with the change. Never edit the lockfile by hand, and read its diff in review.
+
 ## Documentation
 
 Documentation lives in three places that must stay in sync:
